@@ -1,0 +1,1996 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Playables SDK -->
+<script>// Playables SDK v1.0.0
+(function() {
+  'use strict';
+  if (window.playablesSDK) return;
+
+  var HANDLER_NAME = 'playablesGameEventHandler';
+  var ANDROID_BRIDGE_NAME = '_MetaPlayablesBridge';
+  var RAF_FRAME_THRESHOLD = 3;
+
+  var gameReadySent = false;
+  var firstInteractionSent = false;
+  var errorSent = false;
+  var frameCount = 0;
+  var originalRAF = window.requestAnimationFrame;
+
+  function hasIOSBridge() { return !!(window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers[HANDLER_NAME]); }
+  function hasAndroidBridge() { return !!(window[ANDROID_BRIDGE_NAME] && typeof window[ANDROID_BRIDGE_NAME].postEvent === 'function'); }
+  function isInIframe() { return !!(window.parent && window.parent !== window); }
+
+  function sendEvent(eventName, payload) {
+    var message = { type: eventName, payload: payload || {}, timestamp: Date.now() };
+    if (hasIOSBridge()) { try { window.webkit.messageHandlers[HANDLER_NAME].postMessage(message); } catch (e) { } return; }
+    if (hasAndroidBridge()) {
+      try {
+        var p = payload || {}; p.__secureToken = window.__fbAndroidBridgeAuthToken || ''; p.timestamp = message.timestamp;
+        window[ANDROID_BRIDGE_NAME].postEvent(eventName, JSON.stringify(p));
+      } catch (e) { } return;
+    }
+    if (isInIframe()) { try { window.parent.postMessage(message, '*'); } catch (e) { } return; }
+  }
+
+  function onFrame() {
+    if (gameReadySent) return;
+    frameCount++;
+    if (frameCount >= RAF_FRAME_THRESHOLD) { gameReadySent = true; sendEvent('game_ready', { frame_count: frameCount, detected_at: Date.now() }); return; }
+    originalRAF.call(window, onFrame);
+  }
+
+  if (originalRAF) {
+    window.requestAnimationFrame = function(callback) {
+      if (!gameReadySent) {
+        return originalRAF.call(window, function(timestamp) {
+          frameCount++;
+          if (frameCount >= RAF_FRAME_THRESHOLD && !gameReadySent) { gameReadySent = true; sendEvent('game_ready', { frame_count: frameCount, detected_at: Date.now() }); }
+          callback(timestamp);
+        });
+      }
+      return originalRAF.call(window, callback);
+    };
+  }
+
+  function setupFirstInteractionDetection() {
+    var events =['touchstart', 'mousedown', 'keydown'];
+    function onFirstInteraction() {
+      if (firstInteractionSent) return; firstInteractionSent = true; sendEvent('user_interaction_start', null);
+      for (var i = 0; i < events.length; i++) { document.removeEventListener(events[i], onFirstInteraction, true); }
+    }
+    for (var i = 0; i < events.length; i++) { document.addEventListener(events[i], onFirstInteraction, true); }
+  }
+
+  if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', setupFirstInteractionDetection); } else { setupFirstInteractionDetection(); }
+
+  window.addEventListener('error', function(event) {
+    if (errorSent) return; errorSent = true;
+    sendEvent('error', { message: event.message || 'Unknown error', source: event.filename || '', lineno: event.lineno || 0, colno: event.colno || 0, auto_captured: true });
+  });
+
+  window.addEventListener('unhandledrejection', function(event) {
+    if (errorSent) return; errorSent = true; var reason = event.reason;
+    sendEvent('error', { message: (reason instanceof Error) ? reason.message : String(reason), type: 'unhandled_promise_rejection', auto_captured: true });
+  });
+
+  window.playablesSDK = {
+    complete: function(score) { sendEvent('game_ended', { score: score, completed: true }); },
+    error: function(message) { if (errorSent) return; errorSent = true; sendEvent('error', { message: message || 'Unknown error', auto_captured: false }); },
+    sendEvent: function(eventName, payload) { if (!eventName || typeof eventName !== 'string') return; sendEvent(eventName, payload); }
+  };
+
+  if (originalRAF) { originalRAF.call(window, onFrame); }
+})();</script>
+<script>window.Intl=window.Intl||{};Intl.t=function(s){return(Intl._locale&&Intl._locale[s])||s;};</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gospel Prophecy Message - By Minister Michael</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- External Libraries -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
+    <style>
+        :root {
+            --primary: #6d28d9;
+            --primary-light: #ede9fe;
+            --primary-dark: #5b21b6;
+            --dark: #0f172a;
+            --gray: #64748b;
+            --gray-light: #94a3b8;
+            --bg: #f8fafc;
+            --white: #ffffff;
+            --border: #e2e8f0;
+            --success: #059669;
+            --warning: #ef4444;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--dark); line-height: 1.6; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+        h1, h2, h3, .font-display { font-family: 'Playfair Display', serif; }
+
+        /* Professional Scrollbars */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg); }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; border: 2px solid var(--bg); }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* SPA Transition Animations */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .page-transition { animation: fadeInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+
+        /* Header (Advanced Glassmorphism) */
+        .header { background: rgba(255, 255, 255, 0.85); border-bottom: 1px solid rgba(226, 232, 240, 0.8); padding: 14px 24px; position: sticky; top: 0; z-index: 60; backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); transition: all 0.3s ease; }
+        .header-inner { max-width: 1440px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
+        .header-left { display: flex; align-items: center; gap: 16px; }
+        .logo { display: flex; align-items: center; gap: 12px; }
+        .logo-icon { width: 44px; height: 44px; background: var(--primary-light); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: var(--primary); font-size: 20px; position: relative; box-shadow: 0 4px 10px rgba(109, 40, 217, 0.1); }
+        .logo-title { font-weight: 700; font-size: 17px; color: var(--dark); line-height: 1.2; letter-spacing: -0.3px; }
+        .logo-sub { font-size: 12px; color: var(--gray); margin-top: 1px; font-weight: 500; }
+        .header-right { display: flex; align-items: center; gap: 12px; }
+
+        /* Connection Status */
+        .connection-indicator { position: absolute; bottom: -2px; right: -2px; width: 12px; height: 12px; border-radius: 50%; border: 2px solid white; background: var(--gray-light); transition: background 0.3s ease; }
+        .connection-indicator.online { background: var(--success); }
+        .connection-indicator.offline { background: var(--warning); }
+
+        /* Standard Buttons (Tactile Feedback) */
+        .btn { padding: 10px 20px; border-radius: 12px; font-weight: 600; font-size: 14px; cursor: pointer; border: none; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); font-family: 'Inter', sans-serif; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn:active:not(:disabled) { transform: scale(0.96) !important; }
+        .btn:disabled { opacity: 0.65; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
+        .btn-primary { background: var(--primary); color: white; box-shadow: 0 4px 12px rgba(109, 40, 217, 0.25); }
+        .btn-primary:hover:not(:disabled) { background: var(--primary-dark); transform: translateY(-2px); box-shadow: 0 6px 16px rgba(109, 40, 217, 0.35); }
+        .btn-ghost { background: transparent; color: var(--gray); }
+        .btn-ghost:hover:not(:disabled) { background: var(--bg); color: var(--dark); }
+        .btn-outline { background: white; border: 1.5px solid var(--border); color: var(--dark); }
+        .btn-outline:hover:not(:disabled) { border-color: var(--primary); color: var(--primary); background: var(--primary-light); }
+
+        /* Dynamic Special Buttons */
+        .btn-hero { background: linear-gradient(135deg, var(--primary) 0%, #9333ea 100%); color: white; padding: 16px 32px; border-radius: 16px; font-weight: 700; font-size: 16px; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 12px; box-shadow: 0 10px 25px rgba(109,40,217,0.4); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .btn-hero:hover { transform: translateY(-3px); box-shadow: 0 15px 35px rgba(109,40,217,0.5); background: linear-gradient(135deg, var(--primary-dark) 0%, #7e22ce 100%); }
+        .btn-hero:active { transform: scale(0.97); }
+
+        /* User Menu & Avatar */
+        .user-menu { position: relative; }
+        .avatar { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, var(--primary) 0%, #9333ea 100%); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 15px; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 10px rgba(109, 40, 217, 0.2); }
+        .avatar:hover { transform: scale(1.05) translateY(-1px); box-shadow: 0 6px 14px rgba(109, 40, 217, 0.3); }
+        .user-dropdown { position: absolute; right: 0; top: 54px; background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(10px); border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.12); padding: 8px; min-width: 200px; display: none; z-index: 50; border: 1px solid rgba(226, 232, 240, 0.8); transform-origin: top right; animation: dropdownIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes dropdownIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        .user-dropdown.active { display: block; }
+        .user-info { padding: 12px 14px; border-bottom: 1px solid var(--border); margin-bottom: 8px; }
+        .user-name { font-weight: 700; font-size: 14px; color: var(--dark); }
+        .user-email { font-size: 12px; color: var(--gray); margin-top: 2px; }
+        .dropdown-item { width: 100%; padding: 10px 14px; border-radius: 10px; background: none; border: none; text-align: left; cursor: pointer; font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 12px; color: var(--dark); transition: background 0.2s; }
+        .dropdown-item:hover { background: var(--bg); color: var(--primary); }
+
+        /* Layout */
+        .app-layout { max-width: 1440px; margin: 0 auto; padding: 24px; display: grid; grid-template-columns: 240px 1fr 340px; gap: 28px; align-items: start; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+
+        /* Left Sidebar */
+        .left-sidebar { background: var(--white); border-radius: 24px; padding: 24px 20px; box-shadow: 0 4px 25px rgba(0,0,0,0.03); border: 1px solid rgba(226, 232, 240, 0.5); position: sticky; top: 92px; height: calc(100vh - 116px); display: flex; flex-direction: column; z-index: 40;}
+        .nav { display: flex; flex-direction: column; gap: 8px; }
+        .nav-btn { display: flex; align-items: center; gap: 14px; padding: 14px 18px; border-radius: 16px; color: var(--gray); font-weight: 600; font-size: 15px; transition: all 0.2s; background: none; border: none; cursor: pointer; width: 100%; text-align: left; font-family: 'Inter', sans-serif; position: relative; }
+        .nav-btn i { width: 22px; text-align: center; font-size: 18px; transition: transform 0.2s; }
+        .nav-btn:hover { background: var(--bg); color: var(--dark); }
+        .nav-btn:hover i { transform: scale(1.1); }
+        .nav-btn.active { background: var(--primary-light); color: var(--primary); font-weight: 700; box-shadow: inset 3px 0 0 var(--primary); }
+        .sidebar-bottom { margin-top: auto; }
+
+        .quote-box { background: linear-gradient(135deg, #f8fafc 0%, #ede9fe 100%); border: 1px solid #ddd6fe; border-radius: 20px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(109, 40, 217, 0.05); }
+        .quote-text { font-size: 13px; color: #4338ca; font-style: italic; line-height: 1.6; font-weight: 500; }
+        .quote-ref { font-size: 12px; color: var(--primary); font-weight: 700; margin-top: 10px; display: block; text-transform: uppercase; letter-spacing: 0.5px; }
+        .follow-us { margin-bottom: 12px; }
+        .follow-label { font-size: 12px; color: var(--gray); margin-bottom: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+        .social-icons { display: flex; gap: 10px; }
+        .social-icons a { width: 38px; height: 38px; border-radius: 12px; background: var(--white); border: 1.5px solid var(--border); display: flex; align-items: center; justify-content: center; color: var(--gray); transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); font-size: 16px; text-decoration: none; }
+        .social-icons a:hover { border-color: var(--primary); color: white; background: var(--primary); transform: translateY(-3px); box-shadow: 0 6px 15px rgba(109, 40, 217, 0.2); }
+        .copyright { font-size: 11px; color: var(--gray-light); line-height: 1.5; margin-top: 16px; font-weight: 500; }
+
+        /* Center Content */
+        .center-content { min-width: 0; transition: all 0.3s; }
+        .hero { position: relative; border-radius: 28px; overflow: hidden; min-height: 340px; display: flex; align-items: flex-end; margin-bottom: 32px; box-shadow: 0 15px 35px rgba(0,0,0,0.08); }
+        .hero-bg { position: absolute; inset: 0; z-index: 0; }
+        .hero-bg img { width: 100%; height: 100%; object-fit: cover; filter: brightness(1.05); }
+        .hero-overlay { position: absolute; inset: 0; background: linear-gradient(90deg, rgba(15,23,42,0.95) 0%, rgba(15,23,42,0.8) 50%, rgba(15,23,42,0.2) 100%); z-index: 1; }
+        .hero-content { position: relative; z-index: 2; padding: 56px; max-width: 600px; color: white; }
+        .hero-title { font-size: clamp(36px, 4vw, 52px); line-height: 1.1; font-weight: 900; margin-bottom: 16px; letter-spacing: -1px; }
+        .hero-title span { color: #c4b5fd; display: block; }
+        .hero-sub { font-size: 17px; color: #e2e8f0; margin-bottom: 32px; line-height: 1.6; font-weight: 400; }
+
+        .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .section-title { display: flex; align-items: center; gap: 14px; font-size: 24px; font-weight: 800; letter-spacing: -0.5px; }
+        .section-icon { width: 44px; height: 44px; border-radius: 14px; background: var(--primary-light); color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 20px; }
+        .view-all { color: var(--primary); font-size: 14px; font-weight: 700; text-decoration: none; display: flex; align-items: center; gap: 6px; padding: 10px 16px; border-radius: 12px; transition: all 0.2s; background: transparent; border: 1.5px solid transparent; }
+        .view-all:hover { background: var(--primary-light); border-color: #ddd6fe; }
+
+        .testimonies-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+        .testimony-card { background: var(--white); border-radius: 24px; padding: 26px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); border: 1px solid rgba(226, 232, 240, 0.6); position: relative; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; display: flex; flex-direction: column; }
+        .testimony-card:hover { transform: translateY(-5px); box-shadow: 0 15px 35px rgba(0,0,0,0.06); border-color: var(--primary-light); }
+        .testimony-quote { position: absolute; top: 22px; right: 24px; color: var(--primary-light); font-size: 32px; opacity: 0.7; pointer-events: none; }
+        .testimony-text { font-size: 15px; color: #334155; line-height: 1.7; margin-bottom: 24px; padding-right: 28px; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; flex: 1; font-weight: 400; }
+        .testimony-footer { display: flex; align-items: center; gap: 14px; margin-top: auto; }
+        .testimony-avatar { width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 15px; flex-shrink: 0; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .testimony-name { font-weight: 700; font-size: 14px; color: var(--dark); line-height: 1.2; }
+        .testimony-date { font-size: 12px; color: var(--gray); margin-top: 4px; font-weight: 500; }
+
+        /* Right Sidebar */
+        .right-sidebar { background: var(--white); border-radius: 24px; padding: 24px; box-shadow: 0 4px 25px rgba(0,0,0,0.03); border: 1px solid rgba(226, 232, 240, 0.5); position: sticky; top: 92px; max-height: calc(100vh - 116px); display: flex; flex-direction: column; z-index: 40; transition: all 0.3s;}
+        .sidebar-header { margin-bottom: 20px; }
+        .sidebar-title { display: flex; align-items: center; gap: 12px; font-size: 20px; font-weight: 800; margin-bottom: 4px; letter-spacing: -0.5px; }
+        .sidebar-title i { color: var(--primary); font-size: 22px; }
+        .sidebar-subtitle { font-size: 13px; color: var(--gray); font-weight: 500; }
+        .search-wrap { position: relative; margin-bottom: 20px; }
+        .search-wrap i { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--gray-light); font-size: 15px; }
+        .search-input { width: 100%; padding: 13px 16px 13px 44px; border: 1.5px solid var(--border); border-radius: 14px; font-size: 14px; font-weight: 500; background: var(--bg); outline: none; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); font-family: 'Inter', sans-serif; color: var(--dark); }
+        .search-input::placeholder { color: var(--gray-light); }
+        .search-input:focus { border-color: var(--primary); background: white; box-shadow: 0 0 0 4px rgba(109,40,217,0.1); }
+        
+        .prophecy-list { overflow-y: auto; flex: 1; margin: 0 -8px; padding: 0 8px; display: flex; flex-direction: column; gap: 16px; padding-bottom: 10px; }
+        .prophecy-card { padding: 14px; border: 1.5px solid #f1f5f9; border-radius: 18px; background: white; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; }
+        .prophecy-card:hover { border-color: var(--primary-light); box-shadow: 0 8px 25px rgba(109,40,217,0.08); transform: translateY(-3px); }
+        .p-card-top { display: flex; gap: 14px; margin-bottom: 14px; }
+        .p-thumb { width: 78px; height: 78px; border-radius: 14px; object-fit: cover; flex-shrink: 0; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        .p-content { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; }
+        .p-date { font-size: 11px; color: var(--primary); font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+        .p-title { font-weight: 700; font-size: 15px; line-height: 1.35; margin: 0 0 8px; color: var(--dark); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; letter-spacing: -0.2px; }
+        .p-meta { display: flex; gap: 14px; font-size: 12px; color: var(--gray); font-weight: 500; flex-wrap: wrap; }
+        .p-meta span { display: flex; align-items: center; gap: 5px; }
+        .btn-read { width: 100%; background: var(--bg); color: var(--dark); border: 1.5px solid transparent; padding: 10px; border-radius: 12px; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s; font-family: 'Inter', sans-serif; }
+        .prophecy-card:hover .btn-read { background: var(--primary-light); color: var(--primary); }
+
+        /* Single Prophecy View */
+        .single-view { background: white; border-radius: 28px; padding: 40px; box-shadow: 0 8px 30px rgba(0,0,0,0.03); border: 1px solid rgba(226, 232, 240, 0.6); }
+        .back-btn { display: inline-flex; align-items: center; gap: 8px; color: var(--gray); background: transparent; border: 1.5px solid var(--border); cursor: pointer; font-size: 14px; font-weight: 600; margin-bottom: 24px; padding: 10px 16px; border-radius: 12px; transition: all 0.2s; font-family: 'Inter', sans-serif; }
+        .back-btn:hover { background: var(--bg); color: var(--dark); border-color: var(--gray-light); transform: translateX(-2px); }
+        .single-img { width: 100%; height: 420px; object-fit: cover; border-radius: 24px; margin-bottom: 32px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); }
+        .single-meta { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; flex-wrap: wrap; }
+        .single-date { background: var(--primary-light); color: var(--primary); padding: 8px 14px; border-radius: 10px; font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
+        .single-read { color: var(--gray); font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 6px; }
+        .single-title { font-size: 40px; font-weight: 900; line-height: 1.2; margin-bottom: 24px; letter-spacing: -1px; color: var(--dark); }
+        
+        .single-body { font-size: 17px; line-height: 1.85; color: #334155; margin-bottom: 40px; font-weight: 400; }
+        .single-body p { margin-bottom: 1.5em; }
+        .single-body h3 { font-size: 22px; margin: 1.5em 0 0.8em; color: var(--dark); font-weight: 800; font-family: 'Playfair Display', serif; }
+        .single-body blockquote { border-left: 6px solid var(--primary); padding: 18px 24px; background: linear-gradient(90deg, var(--primary-light) 0%, rgba(237,233,254,0.3) 100%); border-radius: 0 16px 16px 0; margin: 32px 0; font-style: italic; color: var(--primary-dark); font-weight: 500; font-size: 18px; line-height: 1.7; }
+        
+        .single-actions { display: flex; gap: 14px; padding: 24px 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); margin-bottom: 40px; flex-wrap: wrap; }
+        .action-btn { display: flex; align-items: center; gap: 10px; padding: 12px 24px; border-radius: 14px; border: 1.5px solid var(--border); background: white; cursor: pointer; font-size: 15px; font-weight: 600; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); font-family: 'Inter', sans-serif; color: var(--dark); }
+        .action-btn:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-light); transform: translateY(-2px); box-shadow: 0 6px 15px rgba(109, 40, 217, 0.1); }
+        .action-btn:active { transform: scale(0.97); }
+        .action-btn.liked { background: var(--primary); color: white; border-color: var(--primary); box-shadow: 0 4px 15px rgba(109, 40, 217, 0.3); }
+        .action-btn.liked i { font-weight: 900; animation: bounceIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes bounceIn { 0% { transform: scale(0); } 50% { transform: scale(1.5); } 100% { transform: scale(1); } }
+        
+        .comments-section h3 { font-size: 22px; margin-bottom: 24px; font-weight: 800; display: flex; align-items: center; gap: 12px; letter-spacing: -0.5px; }
+        .comment-form { background: var(--bg); padding: 24px; border-radius: 20px; margin-bottom: 32px; border: 1px solid var(--border); }
+        .comment-form textarea { width: 100%; padding: 16px; border: 1.5px solid var(--border); border-radius: 14px; font-family: 'Inter', sans-serif; font-size: 15px; resize: vertical; min-height: 100px; outline: none; transition: all 0.2s; background: white; line-height: 1.6; }
+        .comment-form textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(109,40,217,0.1); }
+        .comment-form-footer { display: flex; justify-content: flex-end; margin-top: 16px; }
+        
+        .comment-list { display: flex; flex-direction: column; gap: 20px; }
+        .comment-item { display: flex; gap: 16px; padding: 20px; background: white; border-radius: 20px; border: 1px solid var(--border); box-shadow: 0 2px 10px rgba(0,0,0,0.02); }
+        .comment-avatar { width: 44px; height: 44px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .comment-content { flex: 1; }
+        .comment-header { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+        .comment-name { font-weight: 700; font-size: 15px; color: var(--dark); }
+        .comment-date { font-size: 13px; color: var(--gray); font-weight: 500; }
+        .comment-text { font-size: 15px; line-height: 1.6; color: #475569; }
+        
+        .login-prompt { text-align: center; padding: 32px; background: var(--primary-light); border-radius: 20px; color: var(--primary-dark); border: 1px solid #ddd6fe; font-weight: 500; font-size: 15px;}
+        .login-prompt a { color: var(--primary); font-weight: 800; cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
+
+        /* Support Chat Styling */
+        .chat-container { display: flex; flex-direction: column; height: calc(100vh - 120px); max-height: 750px; background: white; border-radius: 28px; box-shadow: 0 10px 40px rgba(0,0,0,0.05); border: 1px solid rgba(226, 232, 240, 0.8); overflow: hidden; }
+        .chat-header { padding: 24px; background: rgba(255,255,255,0.9); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 16px; font-weight: 700; z-index: 10; }
+        .chat-messages { flex: 1; overflow-y: auto; padding: 24px; display: flex; flex-direction: column; gap: 16px; background: var(--bg); scroll-behavior: smooth; }
+        .chat-bubble { max-width: 75%; padding: 14px 18px; border-radius: 20px; font-size: 15px; line-height: 1.6; position: relative; word-wrap: break-word; font-weight: 400; }
+        .chat-bubble.user { align-self: flex-end; background: linear-gradient(135deg, var(--primary) 0%, #9333ea 100%); color: white; border-bottom-right-radius: 6px; box-shadow: 0 8px 20px rgba(109, 40, 217, 0.2); }
+        .chat-bubble.admin { align-self: flex-start; background: white; color: var(--dark); border-bottom-left-radius: 6px; border: 1px solid var(--border); box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
+        .chat-time { font-size: 11px; margin-top: 8px; opacity: 0.8; display: block; text-align: right; font-weight: 500; }
+        .chat-input-area { padding: 20px 24px; background: white; border-top: 1px solid var(--border); display: flex; gap: 14px; align-items: flex-end; z-index: 10; }
+        .chat-input { flex: 1; padding: 14px 20px; border: 1.5px solid var(--border); border-radius: 20px; font-size: 15px; outline: none; transition: border-color 0.2s; font-family: 'Inter', sans-serif; resize: none; max-height: 120px; overflow-y: auto; line-height: 1.5; }
+        .chat-input:focus { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(109,40,217,0.1); }
+        .chat-send-btn { width: 52px; height: 52px; flex-shrink: 0; border-radius: 50%; background: var(--primary); color: white; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 6px 16px rgba(109, 40, 217, 0.3); font-size: 18px; }
+        .chat-send-btn:hover:not(:disabled) { background: var(--primary-dark); transform: scale(1.05); }
+        .chat-send-btn:active:not(:disabled) { transform: scale(0.95); }
+        .chat-send-btn:disabled { background: var(--gray-light); cursor: not-allowed; transform: none; box-shadow: none; }
+
+        /* Dynamic About Page Typography Engine */
+        .about-body p { margin-bottom: 1.2em; color: #334155; line-height: 1.8; }
+        .about-body img { max-width: 100%; height: auto; border-radius: 16px; margin: 32px auto; display: block; box-shadow: 0 10px 30px rgba(0,0,0,0.08); border: 1px solid var(--border); }
+        .about-body h2, .about-body h3 { font-family: 'Playfair Display', serif; color: var(--dark); font-weight: 800; margin: 1.5em 0 0.8em; }
+        .about-body h2 { font-size: 28px; }
+        .about-body h3 { font-size: 22px; display: flex; align-items: center; gap: 10px; }
+        .about-body ul, .about-body ol { margin-left: 20px; margin-bottom: 1.2em; }
+        .about-body li { margin-bottom: 0.5em; }
+        .about-body strong { color: var(--dark); }
+
+        /* Page Views */
+        .page-header { margin-bottom: 32px; }
+        .page-title { font-size: 36px; font-weight: 900; margin-bottom: 10px; letter-spacing: -1px; color: var(--dark); }
+        .page-subtitle { color: var(--gray); font-size: 16px; font-weight: 500; }
+        
+        .prophecies-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px; }
+        .prophecy-card-large { background: white; border-radius: 24px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.04); border: 1px solid rgba(226, 232, 240, 0.6); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; }
+        .prophecy-card-large:hover { transform: translateY(-6px); box-shadow: 0 20px 40px rgba(0,0,0,0.08); border-color: var(--primary-light); }
+        .prophecy-card-large img { width: 100%; height: 200px; object-fit: cover; transition: transform 0.5s ease; }
+        .prophecy-card-large:hover img { transform: scale(1.03); }
+        .prophecy-card-large-content { padding: 24px; position: relative; background: white; }
+
+        /* Footer */
+        .footer { background: var(--dark); color: white; margin-top: 60px; padding: 40px 0; position: relative; z-index: 10; border-top: 4px solid var(--primary); }
+        .footer-inner { max-width: 1440px; margin: 0 auto; padding: 0 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; }
+        .footer-brand { font-weight: 800; font-size: 18px; letter-spacing: -0.5px; }
+        .footer-brand span { color: #c4b5fd; font-weight: 600; margin-left: 8px; }
+
+        /* Modals & Z-Index Architecture */
+        .modal { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); z-index: 110; display: flex; align-items: center; justify-content: center; padding: 20px; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+        .modal.active { opacity: 1; pointer-events: all; }
+        .modal-content { background: white; border-radius: 28px; padding: 40px; width: 100%; max-width: 440px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); transform: translateY(20px) scale(0.95); transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); max-height: 90vh; overflow-y: auto; position: relative;}
+        .modal.active .modal-content { transform: translateY(0) scale(1); }
+        
+        /* Specialized Share Modal Override */
+        .share-modal-content { max-width: 540px !important; padding: 32px !important; }
+        .preview-img-wrapper { width: 100%; max-height: 420px; overflow: hidden; border-radius: 20px; border: 1px solid var(--border); margin-bottom: 24px; display: flex; align-items: center; justify-content: center; background: var(--bg); box-shadow: inset 0 2px 10px rgba(0,0,0,0.03); }
+        .preview-img-wrapper img { width: 100%; height: auto; object-fit: contain; }
+
+        .modal-header { text-align: center; margin-bottom: 32px; }
+        .modal-title { font-size: 28px; font-weight: 900; margin-bottom: 8px; letter-spacing: -0.5px; color: var(--dark); }
+        .modal-subtitle { color: var(--gray); font-size: 15px; font-weight: 500; }
+        .form-group { margin-bottom: 20px; }
+        .form-label { display: block; font-size: 14px; font-weight: 700; margin-bottom: 8px; color: var(--dark); }
+        .form-input { width: 100%; padding: 14px 16px; border: 1.5px solid var(--border); border-radius: 14px; font-size: 15px; outline: none; transition: all 0.2s; font-family: 'Inter', sans-serif; background: #f8fafc; color: var(--dark); font-weight: 500; }
+        .form-input:focus { border-color: var(--primary); background: white; box-shadow: 0 0 0 4px rgba(109,40,217,0.1); }
+        .modal-footer { text-align: center; margin-top: 24px; font-size: 14px; color: var(--gray); font-weight: 500; }
+        .modal-footer a { color: var(--primary); font-weight: 700; cursor: pointer; text-decoration: none; transition: color 0.2s; }
+        .modal-footer a:hover { color: var(--primary-dark); text-decoration: underline; text-underline-offset: 2px; }
+        .close-modal { position: absolute; top: 20px; right: 20px; width: 36px; height: 36px; border-radius: 50%; background: var(--bg); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--gray); transition: all 0.2s; z-index: 10; font-size: 16px;}
+        .close-modal:hover { background: var(--border); color: var(--dark); transform: rotate(90deg); }
+
+        /* Export Canvas (Hidden offscreen for html2canvas to process) */
+        .export-canvas-wrapper { position: absolute; left: -9999px; top: -9999px; width: 1080px; min-height: 1080px; background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%); display: flex; flex-direction: column; }
+        .export-inner { padding: 80px; display: flex; flex-direction: column; height: 100%; flex: 1; border: 24px solid white; box-shadow: inset 0 0 0 1px #e2e8f0; }
+        .export-header { display: flex; align-items: center; gap: 24px; margin-bottom: 50px; }
+        .export-logo-box { width: 80px; height: 80px; background: #ede9fe; border-radius: 20px; display: flex; align-items: center; justify-content: center; color: #6d28d9; font-size: 36px; }
+        .export-header-text h2 { font-family: 'Inter', sans-serif; font-weight: 800; font-size: 32px; color: #0f172a; margin: 0; line-height: 1.1; }
+        .export-header-text p { font-family: 'Inter', sans-serif; font-size: 20px; color: #64748b; margin: 4px 0 0 0; }
+        
+        /* 9-SIZE DYNAMIC PREMIUM IMAGE COMPOSITION ENGINE */
+        .export-featured-img-premium {
+            display: block;
+            border-radius: 24px;
+            box-shadow: 0 30px 60px -15px rgba(0,0,0,0.15), 0 0 0 2px rgba(255,255,255,0.8) inset, 0 0 0 1px rgba(226, 232, 240, 0.8);
+            margin: 0 auto 50px auto;
+            background: #ffffff;
+            object-fit: contain;
+            max-height: 800px; /* Safety limit to prevent canvas overflow */
+        }
+        /* The 9 Dynamic Layout Modes */
+        .layout-ultra-wide { width: 100%; height: auto; }
+        .layout-cinematic { width: 100%; height: auto; }
+        .layout-landscape { width: 95%; height: auto; }
+        .layout-classic { width: 90%; height: auto; }
+        .layout-square { width: 80%; height: auto; }
+        .layout-portrait-classic { width: 70%; height: auto; }
+        .layout-portrait { width: 60%; height: auto; }
+        .layout-social { width: 50%; height: auto; }
+        .layout-skyscraper { width: 40%; height: auto; }
+
+        .export-content { display: flex; flex-direction: column; flex: 1; }
+        .export-date { font-family: 'Inter', sans-serif; font-size: 20px; color: #6d28d9; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 20px; }
+        .export-title { font-family: 'Playfair Display', serif; font-size: 64px; font-weight: 900; line-height: 1.15; color: #0f172a; margin-bottom: 40px; letter-spacing: -1px; }
+        
+        .export-body { font-family: 'Inter', sans-serif; color: #334155; margin-bottom: 60px; white-space: pre-wrap; word-wrap: break-word;}
+        .export-body p { margin-bottom: 1.5em; }
+        .export-body blockquote { border-left: 8px solid #6d28d9; padding-left: 30px; margin: 30px 0; font-style: italic; color: #4338ca; font-weight: 600; }
+        
+        .export-footer { margin-top: auto; border-top: 3px solid #e2e8f0; padding-top: 40px; text-align: center; }
+        .export-footer-text { font-family: 'Inter', sans-serif; font-size: 22px; font-weight: 600; color: #94a3b8; }
+        .export-footer-text span { color: #6d28d9; font-weight: 800; }
+
+        /* Toast Engine */
+        .toast-container { position: fixed; bottom: 32px; right: 32px; z-index: 99999; display: flex; flex-direction: column; gap: 12px; pointer-events: none; }
+        .toast { background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); padding: 16px 20px; border-radius: 16px; box-shadow: 0 15px 40px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 12px; font-size: 15px; font-weight: 600; min-width: 300px; transform: translateX(calc(100% + 40px)); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); border: 1px solid rgba(226, 232, 240, 0.8); border-left: 5px solid var(--success); color: var(--dark); pointer-events: all; }
+        .toast.show { transform: translateX(0); }
+        .toast i { color: var(--success); font-size: 20px; }
+        .toast.error { border-left-color: var(--warning); }
+        .toast.error i { color: var(--warning); }
+        .toast.warning { border-left-color: #f59e0b; }
+        .toast.warning i { color: #f59e0b; }
+        .toast.loading { border-left-color: var(--primary); }
+        .toast.loading i { color: var(--primary); animation: spin 1s linear infinite; }
+
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        
+        /* RESTRICTED STATES: Account Suspension, Maintenance Mode & Role Upgraded Jail */
+        body.suspended-mode .left-sidebar .nav-btn:not([data-page="contact"]),
+        body.maintenance-mode .left-sidebar .nav-btn:not([data-page="contact"]),
+        body.role-upgraded-mode .left-sidebar .nav-btn:not([data-page="contact"]) { display: none !important; }
+        
+        body.suspended-mode .left-sidebar .quote-box,
+        body.maintenance-mode .left-sidebar .quote-box,
+        body.role-upgraded-mode .left-sidebar .quote-box { display: none !important; }
+        
+        body.suspended-mode .right-sidebar,
+        body.maintenance-mode .right-sidebar,
+        body.role-upgraded-mode .right-sidebar { display: none !important; }
+        
+        body.suspended-mode #openRight,
+        body.maintenance-mode #openRight,
+        body.role-upgraded-mode #openRight { display: none !important; } 
+        
+        body.suspended-mode .app-layout,
+        body.maintenance-mode .app-layout,
+        body.role-upgraded-mode .app-layout { grid-template-columns: 280px 1fr; }
+        
+        .suspended-container {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            min-height: 65vh; background: white; border-radius: 28px; padding: 48px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.05); text-align: center; border: 1px solid var(--warning);
+            animation: fadeInUp 0.5s ease-out;
+        }
+        .suspended-icon {
+            width: 88px; height: 88px; background: #fef2f2; color: var(--warning);
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-size: 40px; margin-bottom: 28px; box-shadow: 0 8px 25px rgba(239, 68, 68, 0.2);
+        }
+        .suspended-title {
+            font-size: 32px; font-weight: 900; margin-bottom: 16px; color: var(--dark); letter-spacing: -0.5px;
+        }
+        .suspended-text {
+            font-size: 17px; color: var(--gray); margin-bottom: 36px; max-width: 460px; line-height: 1.6; font-weight: 500;
+        }
+
+        /* Mobile Adjustments */
+        .mobile-only { display: none !important; }
+        .menu-btn { width: 42px; height: 42px; border-radius: 12px; background: var(--bg); border: 1.5px solid var(--border); display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--dark); transition: all 0.2s; font-size: 18px; }
+        .menu-btn:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-light); }
+        .menu-btn:active { transform: scale(0.95); }
+        
+        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 90; opacity: 0; pointer-events: none; transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); cursor: pointer; }
+        .overlay.active { opacity: 1; pointer-events: all; }
+
+        @media (max-width: 1023px) {
+            .mobile-only { display: flex !important; }
+            .app-layout { grid-template-columns: 1fr; padding: 16px; gap: 0; }
+            
+            body.suspended-mode .app-layout,
+            body.maintenance-mode .app-layout,
+            body.role-upgraded-mode .app-layout { grid-template-columns: 1fr; }
+            
+            .left-sidebar { padding-top: max(20px, env(safe-area-inset-top)); position: fixed; left: 0; top: 0; bottom: 0; width: 300px; z-index: 100; transform: translateX(-100%); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1); border-radius: 0 24px 24px 0; height: 100vh; box-shadow: 10px 0 40px rgba(0,0,0,0.15); overflow-y: auto;}
+            .left-sidebar.open { transform: translateX(0); }
+            
+            .right-sidebar { padding-top: max(20px, env(safe-area-inset-top)); position: fixed; right: 0; top: 0; bottom: 0; width: 360px; max-width: 90vw; z-index: 100; transform: translateX(100%); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1); border-radius: 24px 0 0 24px; height: 100vh; box-shadow: -10px 0 40px rgba(0,0,0,0.15); overflow-y: auto; }
+            .right-sidebar.open { transform: translateX(0); }
+            
+            .sidebar-mobile-header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 20px; margin-bottom: 20px; border-bottom: 1px solid var(--border); }
+            
+            .hero-content { padding: 40px 24px; }
+            .testimonies-grid { grid-template-columns: 1fr; }
+            .single-view { padding: 32px 20px; border-radius: 20px; }
+            .single-img { height: 260px; border-radius: 16px; }
+            .single-title { font-size: 30px; }
+            .chat-container { height: calc(100vh - 160px); border-radius: 20px; }
+        }
+
+        @media (max-width: 640px) {
+            .header { padding: 12px 16px; }
+            .logo-title { font-size: 16px; }
+            .logo-sub { display: none; }
+            .prophecies-grid { grid-template-columns: 1fr; }
+            .export-canvas-wrapper { width: 1080px; } 
+            .toast-container { bottom: 20px; right: 20px; left: 20px; align-items: center; }
+            .toast { min-width: 100%; width: 100%; }
+        }
+
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-inner">
+            <div class="header-left">
+                <button type="button" class="menu-btn mobile-only" id="openLeft">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+                <div class="logo">
+                    <div class="logo-icon">
+                        <i class="fa-solid fa-cross"></i>
+                        <span id="connectionDot" class="connection-indicator offline" title="Offline"></span>
+                    </div>
+                    <div>
+                        <div class="logo-title">Gospel Prophecy Message</div>
+                        <div class="logo-sub">By Minister Michael</div>
+                    </div>
+                </div>
+            </div>
+            <div class="header-right">
+                <button type="button" class="menu-btn mobile-only" id="openRight">
+                    <i class="fa-solid fa-book-open"></i>
+                </button>
+                <div id="authButtons">
+                    <button type="button" class="btn btn-ghost" onclick="openModal('login')">Login</button>
+                    <button type="button" class="btn btn-primary" onclick="openModal('register')" id="headerRegBtn">Register</button>
+                </div>
+                <div id="userMenu" class="user-menu hidden">
+                    <div class="avatar" id="userAvatar" onclick="toggleUserDropdown()"></div>
+                    <div class="user-dropdown" id="userDropdown">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Global Announcement Banner -->
+    <div id="announcement-bar" class="hidden bg-gradient-to-r from-amber-600 to-orange-700 text-white px-4 md:px-6 py-2.5 flex-col sm:flex-row justify-between items-center z-[55] shadow-[0_4px_15px_rgba(245,158,11,0.2)] shrink-0 border-b border-amber-500/50">
+        <div class="flex items-center gap-3 text-sm mb-2 sm:mb-0">
+            <div class="bg-amber-900/40 w-8 h-8 rounded-full flex items-center justify-center shrink-0 border border-amber-500/30"><i class="fa-solid fa-bullhorn animate-bounce text-amber-300"></i></div>
+            <span id="announcement-text" class="font-extrabold tracking-wide leading-tight">System Announcement</span>
+        </div>
+        <div class="flex items-center gap-2 bg-black/30 px-3 py-1.5 rounded-lg border border-black/20">
+            <span class="text-[10px] uppercase font-bold text-amber-200/70 tracking-widest">Expires In</span>
+            <span class="text-sm font-mono font-black tracking-wider" id="announcement-timer">00:00:00</span>
+        </div>
+    </div>
+
+    <div class="overlay" id="overlay" onclick="closeSidebars()"></div>
+
+    <!-- App Layout -->
+    <div class="app-layout">
+        <!-- Left Sidebar -->
+        <aside class="left-sidebar" id="leftSidebar">
+            <div class="sidebar-mobile-header mobile-only">
+                <div class="logo-title text-primary"><i class="fa-solid fa-cross mr-2"></i> Menu</div>
+                <button type="button" onclick="closeSidebars()" class="menu-btn"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            
+            <nav class="nav" id="mainNav">
+                <button type="button" class="nav-btn active" data-page="home" onclick="navigate('home')">
+                    <i class="fa-solid fa-house"></i> Home
+                </button>
+                <button type="button" class="nav-btn" data-page="prophecy" onclick="navigate('prophecy')">
+                    <i class="fa-solid fa-fire-flame-curved"></i> Prophecy
+                </button>
+                <button type="button" class="nav-btn" data-page="about" onclick="navigate('about')">
+                    <i class="fa-solid fa-circle-info"></i> About
+                </button>
+                <button type="button" class="nav-btn" data-page="contact" onclick="navigate('contact')">
+                    <i class="fa-solid fa-headset"></i> Support Chat
+                    <span id="nav-support-badge" class="absolute right-3 w-2 h-2 rounded-full bg-red-500 hidden animate-pulse"></span>
+                </button>
+            </nav>
+
+            <div class="sidebar-bottom">
+                <div class="quote-box">
+                    <div class="quote-text">"Surely the Lord GOD does nothing, unless He reveals His secret to His servants the prophets."</div>
+                    <div class="quote-ref">Amos 3:7</div>
+                </div>
+                <div class="follow-us">
+                    <div class="follow-label">Follow us</div>
+                    <div class="social-icons">
+                        <a href="#" title="YouTube"><i class="fa-brands fa-youtube"></i></a>
+                        <a href="#" title="Instagram"><i class="fa-brands fa-instagram"></i></a>
+                        <a href="#" title="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
+                    </div>
+                </div>
+                <div class="copyright">© 2026 Gospel Prophecy Message. All rights reserved.</div>
+            </div>
+        </aside>
+
+        <!-- Center Content -->
+        <main class="center-content page-transition" id="centerContent">
+            <!-- Content injected by JS -->
+        </main>
+
+        <!-- Right Sidebar -->
+        <aside class="right-sidebar" id="rightSidebar">
+            <div class="sidebar-mobile-header mobile-only">
+                <div class="logo-title text-primary"><i class="fa-solid fa-book-bible mr-2"></i> Prophecies</div>
+                <button type="button" onclick="closeSidebars()" class="menu-btn"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            
+            <div class="sidebar-header">
+                <h3 class="sidebar-title">
+                    <i class="fa-solid fa-book-bible"></i> Prophecy
+                </h3>
+                <p class="sidebar-subtitle">Outpour of prophetic messages</p>
+            </div>
+            <div class="search-wrap">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" class="search-input" id="searchInput" placeholder="Search prophecies...">
+            </div>
+            <div class="prophecy-list" id="prophecyList">
+                <!-- Injected by JS -->
+            </div>
+        </aside>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-inner">
+            <div class="footer-brand">
+                Gospel Prophecy Message <span>by Minister Michael</span>
+            </div>
+            <div class="footer-social">
+                <a href="#"><i class="fa-brands fa-youtube"></i></a>
+                <a href="#"><i class="fa-brands fa-instagram"></i></a>
+                <a href="#"><i class="fa-brands fa-whatsapp"></i></a>
+                <a href="#"><i class="fa-brands fa-facebook"></i></a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Login Modal -->
+    <div class="modal" id="loginModal">
+        <div class="modal-content">
+            <button type="button" class="close-modal" onclick="closeModal('login')"><i class="fa-solid fa-xmark"></i></button>
+            <div class="modal-header">
+                <div class="modal-title font-display">Welcome Back</div>
+                <div class="modal-subtitle">Sign in to receive prophetic words</div>
+            </div>
+            <form id="loginForm" onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <input type="email" class="form-input" id="loginEmail" required placeholder="you@example.com">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Password</label>
+                    <input type="password" class="form-input" id="loginPassword" required placeholder="••••••••">
+                </div>
+                <button type="submit" class="btn btn-primary" id="loginSubmitBtn" style="width: 100%; justify-content: center; margin-top: 12px; padding: 14px;">
+                    Login
+                </button>
+            </form>
+            <div class="modal-footer" id="loginRegFooter"></div>
+        </div>
+    </div>
+
+    <!-- Register Modal -->
+    <div class="modal" id="registerModal">
+        <div class="modal-content">
+            <button type="button" class="close-modal" onclick="closeModal('register')"><i class="fa-solid fa-xmark"></i></button>
+            <div class="modal-header">
+                <div class="modal-title font-display">Join The Watchmen</div>
+                <div class="modal-subtitle">Create account to interact with prophecies</div>
+            </div>
+            <form id="registerForm" onsubmit="handleRegister(event)">
+                <div class="form-group">
+                    <label class="form-label">Full Name</label>
+                    <input type="text" class="form-input" id="regName" required placeholder="John Doe">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <input type="email" class="form-input" id="regEmail" required placeholder="you@example.com">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Password</label>
+                    <input type="password" class="form-input" id="regPassword" required placeholder="Minimum 6 characters" minlength="6">
+                </div>
+                <button type="submit" class="btn btn-primary" id="registerSubmitBtn" style="width: 100%; justify-content: center; margin-top: 12px; padding: 14px;">
+                    Create Account
+                </button>
+            </form>
+            <div class="modal-footer">
+                Already have an account? <a onclick="switchModal('register', 'login')">Login</a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Professional Share Modal -->
+    <div class="modal" id="shareModal">
+        <div class="modal-content share-modal-content">
+            <button type="button" class="close-modal" onclick="closeModal('share')"><i class="fa-solid fa-xmark"></i></button>
+            <div class="modal-header" style="margin-bottom: 20px;">
+                <div class="modal-title font-display" style="font-size: 26px;">Share Prophecy</div>
+                <div class="modal-subtitle">High-Quality Social Media Image Generated</div>
+            </div>
+            
+            <div class="preview-img-wrapper" id="shareImagePreviewBox">
+                <!-- Image injected here -->
+            </div>
+            
+            <div class="grid grid-cols-2 gap-4" id="shareActionButtons">
+                <button type="button" id="btnDownloadImage" class="btn btn-primary w-full justify-center shadow-md py-3 text-[14px] font-bold">
+                    <i class="fa-solid fa-download"></i> Save HD Image
+                </button>
+                <button type="button" id="btnNativeShare" class="btn btn-primary w-full justify-center shadow-md py-3 text-[14px] font-bold bg-[#25d366] hover:bg-[#1ebc59]">
+                    <i class="fa-solid fa-share-nodes"></i> Share Native
+                </button>
+                <button type="button" id="btnCopyLink" class="btn btn-outline col-span-2 w-full justify-center py-3 text-[14px] font-bold">
+                    <i class="fa-solid fa-link"></i> Copy Post Link
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden Export Generation Canvas Framework -->
+    <div id="exportContainerWrapper" class="export-canvas-wrapper">
+        <div class="export-inner">
+            <div class="export-header">
+                <div class="export-logo-box"><i class="fa-solid fa-cross"></i></div>
+                <div class="export-header-text">
+                    <h2>Gospel Prophecy Message</h2>
+                    <p>By Minister Michael</p>
+                </div>
+            </div>
+            
+            <!-- 9-SIZE DYNAMIC PREMIUM IMAGE COMPOSITION ENGINE -->
+            <img id="exportImg" class="export-featured-img-premium hidden" crossOrigin="anonymous" alt="Prophecy Visual">
+            
+            <div class="export-content">
+                <div class="export-date" id="exportDate"></div>
+                <div class="export-title" id="exportTitle"></div>
+                <div class="export-body" id="exportBody"></div>
+            </div>
+            
+            <div class="export-footer">
+                <div class="export-footer-text">Read the full prophecy at <span id="exportDomainName">gospelprophecy.com</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- FIREBASE & ARCHITECTURE LOGIC -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, get, set, push, onValue, runTransaction, update, onChildAdded, onChildChanged, onChildRemoved } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyC62LYyePrJv28CsNstvo5r-jssqT0HSZM",
+            authDomain: "gospelprophecy-15f18.firebaseapp.com",
+            projectId: "gospelprophecy-15f18",
+            storageBucket: "gospelprophecy-15f18.firebasestorage.app",
+            messagingSenderId: "116748115311",
+            appId: "1:116748115311:web:376f8530f95b1955301c9a",
+            measurementId: "G-D4RYBRWGHF"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        /* ====================================================================
+           0. UTILITIES (DEBOUNCE ENGINE)
+        ==================================================================== */
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => { clearTimeout(timeout); func(...args); };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        /* ====================================================================
+           1. HIGH-PERFORMANCE CACHING LAYER (IndexedDB Wrapper)
+        ==================================================================== */
+        const CacheDB = {
+            db: null,
+            init() {
+                return new Promise((resolve) => {
+                    if (!window.indexedDB) return resolve(); 
+                    const req = indexedDB.open('GPM_Data_Cache', 1);
+                    req.onupgradeneeded = e => { e.target.result.createObjectStore('prophecies', { keyPath: 'id' }); };
+                    req.onsuccess = e => { this.db = e.target.result; resolve(); };
+                    req.onerror = () => { console.warn('IDB init failed, falling back to memory'); resolve(); };
+                });
+            },
+            getAll() {
+                return new Promise((resolve) => {
+                    if (!this.db) return resolve([]);
+                    try {
+                        const tx = this.db.transaction('prophecies', 'readonly');
+                        const req = tx.objectStore('prophecies').getAll();
+                        req.onsuccess = () => resolve(req.result);
+                        req.onerror = () => resolve([]);
+                    } catch(e) { resolve([]); }
+                });
+            },
+            putBatch(items) {
+                if (!this.db || items.length === 0) return;
+                try {
+                    const tx = this.db.transaction('prophecies', 'readwrite');
+                    items.forEach(item => tx.objectStore('prophecies').put(item));
+                } catch(e) {}
+            },
+            remove(id) {
+                if (!this.db) return;
+                try { this.db.transaction('prophecies', 'readwrite').objectStore('prophecies').delete(id); } catch(e) {}
+            }
+        };
+
+        const IDBQueue = new Map();
+        let idbFlushTimer = null;
+        function queueCacheWrite(id, data) {
+            IDBQueue.set(id, data);
+            if (!idbFlushTimer) {
+                idbFlushTimer = setTimeout(() => {
+                    idbFlushTimer = null;
+                    CacheDB.putBatch(Array.from(IDBQueue.values()));
+                    IDBQueue.clear();
+                }, 500);
+            }
+        }
+
+        /* ====================================================================
+           2. GLOBAL STATE & MEMORY MANAGEMENT
+        ==================================================================== */
+        const STATE = {
+            currentPage: 'home', currentProphecyId: null, user: null, isSuspended: false, isRoleUpgraded: false, isOnline: false,
+            userLikes:[], propheciesMap: new Map(), prophecies:[], searchQuery: '',
+            about: null,
+            config: { registrationEnabled: true, commentsEnabled: true, maintenanceMode: false, maintenanceMessage: 'System under maintenance.' }
+        };
+        
+        // Background Scheduler Memory Map
+        window.scheduledContentQueue = {};
+
+        const Listeners = { chat:[], status: null, role: null, supportUnread: null, likes: null };
+        const AVATAR_COLORS =['#6d28d9', '#db2777', '#ea580c', '#0891b2', '#059669', '#dc2626', '#9333ea', '#2563eb'];
+        
+        // Comprehensive Firebase DB Key Sanitization Regex
+        const encodeEmail = email => email.replace(/[.#$\[\]]/g, ',');
+
+        /* ====================================================================
+           3. BROADCAST ANNOUNCEMENT ENGINE
+        ==================================================================== */
+        window.Announcement = {
+            timer: null,
+            update: (data) => {
+                clearInterval(window.Announcement.timer);
+                const bar = document.getElementById('announcement-bar');
+                const textEl = document.getElementById('announcement-text');
+                const timeEl = document.getElementById('announcement-timer');
+                
+                const tick = () => {
+                    const now = Date.now();
+                    if(!data || data.expiresAt <= now) {
+                        bar.classList.add('hidden'); bar.classList.remove('flex');
+                        clearInterval(window.Announcement.timer);
+                        return;
+                    }
+                    bar.classList.remove('hidden'); bar.classList.add('flex');
+                    textEl.innerText = data.text;
+                    const diff = Math.floor((data.expiresAt - now) / 1000);
+                    const h = String(Math.floor(diff / 3600)).padStart(2, '0');
+                    const m = String(Math.floor((diff % 3600) / 60)).padStart(2, '0');
+                    const s = String(diff % 60).padStart(2, '0');
+                    timeEl.innerText = `${h}:${m}:${s}`;
+                };
+                tick();
+                window.Announcement.timer = setInterval(tick, 1000);
+            },
+            hide: () => {
+                const bar = document.getElementById('announcement-bar');
+                if (bar) { bar.classList.add('hidden'); bar.classList.remove('flex'); }
+                clearInterval(window.Announcement.timer);
+            }
+        };
+
+        /* ====================================================================
+           4. AUTONOMOUS WEB WORKER SCHEDULER ENGINE (100% Fully Implemented)
+        ==================================================================== */
+        window.Scheduler = {
+            worker: null,
+            init: () => {
+                const workerCode = `
+                    let interval;
+                    self.onmessage = function(e) {
+                        if (e.data.command === 'start') {
+                            interval = setInterval(() => {
+                                self.postMessage('EXECUTE_CRON_PULSE');
+                            }, 5000); // Polling every 5 seconds for pinpoint accuracy
+                        }
+                    };
+                `;
+                const blob = new Blob([workerCode], { type: 'application/javascript' });
+                window.Scheduler.worker = new Worker(URL.createObjectURL(blob));
+                
+                window.Scheduler.worker.onmessage = function(e) {
+                    if (e.data === 'EXECUTE_CRON_PULSE') {
+                        window.Scheduler.processAutoPublish();
+                    }
+                };
+                window.Scheduler.worker.postMessage({ command: 'start' });
+            },
+            processAutoPublish: async () => {
+                if (!window.scheduledContentQueue || Object.keys(window.scheduledContentQueue).length === 0) return;
+                const now = Date.now();
+                const updates = {};
+                let autoPublishedCount = 0;
+                let localStateChanged = false;
+                
+                Object.entries(window.scheduledContentQueue).forEach(([id, c]) => {
+                    if (c.status === 'Scheduled' && c.scheduledFor && c.scheduledFor <= now) {
+                        // Prepare the DB Write Package for anyone with permissions
+                        updates[`content/${id}/status`] = 'Published';
+                        updates[`content/${id}/publishedAt`] = c.scheduledFor; // Use exact scheduled time
+                        updates[`content/${id}/scheduledFor`] = null; 
+                        autoPublishedCount++;
+
+                        // Robust fallback: Instantly push to the UI for standard users before DB write finishes
+                        // This guarantees they see it perfectly at the scheduled time even if Firebase blocks their write
+                        if (!STATE.propheciesMap.has(id)) {
+                            c.status = 'Published';
+                            c.publishedAt = c.scheduledFor;
+                            c.date = c.scheduledFor;
+                            STATE.propheciesMap.set(id, c);
+                            queueCacheWrite(id, c);
+                            localStateChanged = true;
+                        }
+                        
+                        delete window.scheduledContentQueue[id];
+                    }
+                });
+
+                if (localStateChanged) {
+                    scheduleRender();
+                }
+                
+                if (autoPublishedCount > 0) {
+                    try {
+                        await update(ref(db, '/'), updates);
+                        console.info(`[Scheduler] Autonomous Worker Published ${autoPublishedCount} background matrix items.`);
+                    } catch(e) {
+                        // Standard Users will naturally fail this write due to security rules.
+                        // The seamless local UI mutation handled above makes it completely invisible to them!
+                        console.info("[Scheduler] DB Write Overruled (Normal for non-admins). Local state handles visibility.");
+                    }
+                }
+            }
+        };
+
+        /* ====================================================================
+           5. UI BATCH RENDERER (Zero-Lag patcher)
+        ==================================================================== */
+        let renderRequested = false;
+        function scheduleRender() {
+            if (!renderRequested) {
+                renderRequested = true;
+                requestAnimationFrame(() => {
+                    STATE.prophecies = Array.from(STATE.propheciesMap.values()).sort((a, b) => {
+                        if (a.pinned && !b.pinned) return -1;
+                        if (!a.pinned && b.pinned) return 1;
+                        return b.date - a.date;
+                    });
+                    updateViews(); 
+                    
+                    // Re-trigger CSS animation for smooth SPA routing feel
+                    const centerContent = document.getElementById('centerContent');
+                    centerContent.classList.remove('page-transition');
+                    void centerContent.offsetWidth; // Trigger reflow
+                    centerContent.classList.add('page-transition');
+                    
+                    renderRequested = false;
+                });
+            }
+        }
+
+        function safeHTMLPatch(elementId, newHTML) {
+            const el = document.getElementById(elementId);
+            if (el && el.innerHTML !== newHTML) el.innerHTML = newHTML;
+        }
+
+        /* ====================================================================
+           6. DATA NORMALIZATION & UPGRADED PARSING
+        ==================================================================== */
+        function parseProphecy(key, p) {
+            const postDate = p.publishedAt || p.scheduledFor || p.createdAt || p.updated || Date.now();
+            
+            return {
+                id: key, 
+                title: p.title || 'Untitled', 
+                image: p.image || 'https://images.unsplash.com/photo-1504052434569-70ad5836ab65?w=1000',
+                body: p.body || '', 
+                date: postDate, 
+                readTime: p.readTime || Math.max(1, Math.ceil((p.body || '').split(' ').length / 200)),
+                likes: p.likes || 0, 
+                shares: p.shares || 0, 
+                status: p.status || 'Draft', 
+                pinned: p.pinned || false,
+                scheduledFor: p.scheduledFor || null,
+                publishedAt: p.publishedAt || null,
+                createdAt: p.createdAt || null,
+                updated: p.updated || null,
+                comments: p.comments ? Object.entries(p.comments).map(([cId, cData]) => ({id: cId, ...cData})) :[]
+            };
+        }
+
+        /* ====================================================================
+           7. FIREBASE SYNC ENGINE (Upgraded Dynamic State Hiding)
+        ==================================================================== */
+        function initFirebaseListeners() {
+            onValue(ref(db, '.info/connected'), (snap) => {
+                STATE.isOnline = snap.val() === true;
+                const dot = document.getElementById('connectionDot');
+                if (dot) {
+                    dot.className = `connection-indicator ${STATE.isOnline ? 'online' : 'offline'}`;
+                    dot.title = STATE.isOnline ? "Online - Real-time sync active" : "Offline - Showing cached data";
+                }
+            });
+
+            onValue(ref(db, 'config'), snap => {
+                if(snap.exists()) {
+                    const c = snap.val();
+                    STATE.config = { ...STATE.config, ...c };
+                    document.body.classList.toggle('maintenance-mode', STATE.config.maintenanceMode);
+                    
+                    if (c.announcement) {
+                        window.Announcement.update(c.announcement);
+                    } else {
+                        window.Announcement.hide();
+                    }
+                    
+                    renderAuth(); scheduleRender(); 
+                }
+            });
+
+            // Dynamic About Page Listener
+            onValue(ref(db, 'about'), snap => {
+                STATE.about = snap.exists() ? snap.val() : null;
+                if (STATE.currentPage === 'about') scheduleRender();
+            });
+
+            const contentRef = ref(db, 'content');
+            onChildAdded(contentRef, snap => { if (snap.exists()) handleSyncUpdate(snap.key, snap.val()); });
+            onChildChanged(contentRef, snap => { if (snap.exists()) handleSyncUpdate(snap.key, snap.val()); });
+            onChildRemoved(contentRef, snap => { 
+                STATE.propheciesMap.delete(snap.key); CacheDB.remove(snap.key); 
+                delete window.scheduledContentQueue[snap.key]; 
+                scheduleRender(); 
+                
+                // Route fallback if viewing a deleted post
+                if (STATE.currentPage === 'single' && STATE.currentProphecyId === snap.key) {
+                    showToast('This prophecy has been permanently removed.', 'warning');
+                    navigate('home');
+                }
+            });
+        }
+
+        function handleSyncUpdate(key, rawData) {
+            const parsed = parseProphecy(key, rawData);
+            const now = Date.now();
+
+            // Core Scheduling Upgrade: Evaluate if it should be completely visible based on exact time
+            const isEffectivelyPublished = parsed.status === 'Published' || 
+                                           (parsed.status === 'Scheduled' && parsed.scheduledFor && parsed.scheduledFor <= now);
+
+            // If it's physically scheduled for a future time, slot it into the background worker queue
+            if (parsed.status === 'Scheduled' && parsed.scheduledFor && parsed.scheduledFor > now) {
+                window.scheduledContentQueue[key] = parsed;
+            } else {
+                delete window.scheduledContentQueue[key];
+            }
+
+            // Upgraded Hiding Logic: After an admin reschedules or unpublishes a post
+            if (!isEffectivelyPublished) {
+                if(STATE.propheciesMap.has(key)) { 
+                    STATE.propheciesMap.delete(key); 
+                    CacheDB.remove(key); 
+                    scheduleRender(); 
+                }
+
+                // Protect user UX: redirect seamlessly if they were reading the post when it was hidden
+                if (STATE.currentPage === 'single' && STATE.currentProphecyId === key) {
+                    showToast('This prophecy has been rescheduled or hidden by the administration.', 'warning');
+                    navigate('home');
+                }
+                return;
+            }
+            
+            // Reaches here if effectively published (physically published OR scheduled time just arrived)
+            if (parsed.status === 'Scheduled') {
+                parsed.status = 'Published';
+                parsed.publishedAt = parsed.scheduledFor;
+                parsed.date = parsed.scheduledFor;
+            }
+
+            const current = STATE.propheciesMap.get(key);
+            if (!current || JSON.stringify(current) !== JSON.stringify(parsed)) {
+                STATE.propheciesMap.set(key, parsed); queueCacheWrite(key, parsed); scheduleRender();
+            }
+        }
+
+        /* ====================================================================
+           8. INITIALIZATION & LISTENER CORE (With Deep-Link Engine)
+        ==================================================================== */
+        async function init() {
+            await CacheDB.init();
+            window.Scheduler.init();
+            
+            // 1. URL Deep Link Parameter Parser
+            const urlParams = new URLSearchParams(window.location.search);
+            const deepLinkId = urlParams.get('p');
+            if (deepLinkId) {
+                STATE.currentPage = 'single';
+                STATE.currentProphecyId = deepLinkId;
+            }
+
+            // 2. Hydrate from Cache
+            const cachedItems = await CacheDB.getAll();
+            if (cachedItems && cachedItems.length > 0) {
+                cachedItems.forEach(p => STATE.propheciesMap.set(p.id, p));
+                STATE.prophecies = Array.from(STATE.propheciesMap.values());
+                updateViews(); 
+            }
+
+            // 3. Mount Session Security
+            const savedSession = localStorage.getItem('gpm_rtdb_session');
+            if (savedSession) {
+                STATE.user = JSON.parse(savedSession);
+                listenToUserLikes(); listenToUserSupportStatus(); listenToUserStatus(); listenToUserRole();
+            }
+
+            // 4. Attach Hooks
+            setupEventListeners(); initFirebaseListeners();
+
+            // 5. Initial Nav Rules
+            if (deepLinkId) {
+                document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            } else if (cachedItems.length === 0) {
+                navigate('home');
+            } else if (STATE.currentPage === 'home') {
+                renderHome();
+            }
+        }
+
+        function listenToUserStatus() {
+            if (!STATE.user) return;
+            if (Listeners.status) Listeners.status(); 
+            Listeners.status = onValue(ref(db, `users/${STATE.user.id}/status`), snap => {
+                if(!snap.exists()) return;
+                const status = snap.val();
+                if (status === 'Suspended') {
+                    if (!STATE.isSuspended) {
+                        STATE.isSuspended = true;
+                        showToast('Security Alert: Your session was restricted.', 'error');
+                        navigate('suspended');
+                    }
+                } else if (status === 'Active' && STATE.isSuspended) {
+                    STATE.isSuspended = false;
+                    showToast('Your account has been restored.', 'success');
+                    navigate('home');
+                }
+            });
+        }
+        
+        // RBAC Role Listener Engine (Admin Hierarchy Compatibility)
+        function listenToUserRole() {
+            if (!STATE.user) return;
+            if (Listeners.role) Listeners.role();
+            Listeners.role = onValue(ref(db, `users/${STATE.user.id}/role`), snap => {
+                if (!snap.exists()) return;
+                const role = snap.val();
+                const isElevated = (role === 'Admin' || role === 'Moderator' || role === 'Superadmin');
+
+                if (isElevated && !STATE.isRoleUpgraded) {
+                    STATE.isRoleUpgraded = true;
+                    showToast('Role Updated: You are now an administrator.', 'success');
+                    navigate('role_upgraded');
+                } else if (!isElevated && STATE.isRoleUpgraded) {
+                    STATE.isRoleUpgraded = false;
+                    showToast('Role updated to standard user.', 'success');
+                    navigate('home');
+                }
+            });
+        }
+
+        function listenToUserLikes() {
+            if (!STATE.user || STATE.isSuspended || STATE.isRoleUpgraded) return;
+            if (Listeners.likes) Listeners.likes();
+            Listeners.likes = onValue(ref(db, `users/${STATE.user.id}/likes`), (snapshot) => {
+                STATE.userLikes = snapshot.exists() ? Object.keys(snapshot.val()).filter(k => snapshot.val()[k]) :[];
+                if (STATE.currentPage === 'single') scheduleRender();
+            });
+        }
+
+        function listenToUserSupportStatus() {
+            if(!STATE.user) return;
+            if(Listeners.supportUnread) Listeners.supportUnread();
+            Listeners.supportUnread = onValue(ref(db, `support_chats/${STATE.user.id}/unreadUser`), snap => {
+                const navBadge = document.getElementById('nav-support-badge');
+                if(navBadge) navBadge.classList.toggle('hidden', !snap.val());
+            });
+        }
+
+        /* ====================================================================
+           9. VIEW RENDERING CONTROLLERS
+        ==================================================================== */
+        function updateViews() {
+            if (STATE.isRoleUpgraded) {
+                document.body.classList.add('role-upgraded-mode');
+                document.body.classList.remove('suspended-mode');
+                if (STATE.currentPage === 'contact') renderContact(); else renderRoleUpgraded();
+                renderRightSidebar(); return;
+            } else { document.body.classList.remove('role-upgraded-mode'); }
+
+            if (STATE.isSuspended) {
+                document.body.classList.add('suspended-mode');
+                if (STATE.currentPage === 'contact') renderContact(); else renderSuspended();
+                renderRightSidebar(); return;
+            } else { document.body.classList.remove('suspended-mode'); }
+
+            if (STATE.config.maintenanceMode && STATE.currentPage !== 'contact') {
+                renderMaintenance();
+            } else {
+                if (STATE.currentPage === 'home') renderHome();
+                else if (STATE.currentPage === 'prophecy') renderProphecyList();
+                else if (STATE.currentPage === 'about') renderAbout();
+                else if (STATE.currentPage === 'contact') renderContact();
+                else if (STATE.currentPage === 'single') renderSingleProphecy(STATE.currentProphecyId);
+            }
+            renderRightSidebar();
+        }
+        
+        function renderRoleUpgraded() {
+            safeHTMLPatch('centerContent', `
+                <div class="suspended-container mt-8" style="border-color: var(--primary);">
+                    <div class="suspended-icon" style="background: var(--primary-light); color: var(--primary); box-shadow: 0 4px 20px rgba(109, 40, 217, 0.15);">
+                        <i class="fa-solid fa-crown"></i>
+                    </div>
+                    <h1 class="suspended-title">Administrative Account Verified</h1>
+                    <p class="suspended-text">Your account holds elevated privileges (Moderator, Admin, or Superadmin). This client-facing portal is structurally designed for standard traffic. Navigate to your dedicated Enterprise Admin Panel to manage operations.</p>
+                    <div class="flex gap-4 mt-2">
+                        <button type="button" class="btn btn-outline" onclick="logout()"><i class="fa-solid fa-arrow-right-from-bracket"></i> Logout</button>
+                        <button type="button" class="btn btn-primary" onclick="navigate('contact')">
+                            <i class="fa-solid fa-headset"></i> Contact Hierarchy
+                        </button>
+                    </div>
+                </div>
+            `);
+        }
+
+        function renderSuspended() {
+            safeHTMLPatch('centerContent', `
+                <div class="suspended-container mt-8">
+                    <div class="suspended-icon"><i class="fa-solid fa-user-lock"></i></div>
+                    <h1 class="suspended-title">Account Suspended</h1>
+                    <p class="suspended-text">Your account has been suspended by system administration. Please contact support for assistance regarding your standing.</p>
+                    <div class="flex gap-4 mt-2">
+                        <button type="button" class="btn btn-outline" onclick="logout()"><i class="fa-solid fa-arrow-right-from-bracket"></i> Logout</button>
+                        <button type="button" class="btn btn-primary" style="background: var(--warning); box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);" onclick="navigate('contact')">
+                            <i class="fa-solid fa-headset"></i> Contact Support
+                        </button>
+                    </div>
+                </div>
+            `);
+        }
+
+        function renderMaintenance() {
+            safeHTMLPatch('centerContent', `
+                <div class="bg-white rounded-3xl p-10 text-center flex flex-col items-center justify-center min-h-[60vh] shadow-[0_10px_40px_rgba(0,0,0,0.05)] border border-border mt-4">
+                    <div class="w-24 h-24 bg-red-50 text-red-500 rounded-full flex items-center justify-center text-4xl mb-6 shadow-inner"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                    <h1 class="text-3xl font-extrabold text-dark mb-4 font-display">System Under Maintenance</h1>
+                    <p class="text-gray max-w-md mx-auto mb-8 leading-relaxed text-lg">${STATE.config.maintenanceMessage}</p>
+                    <div class="flex gap-4"><button type="button" onclick="navigate('contact')" class="btn-maintenance"><i class="fa-solid fa-headset"></i> Contact Support</button></div>
+                </div>
+            `);
+        }
+
+        /* Ultra-Optimized Event Listeners with Debouncing */
+        function setupEventListeners() {
+            document.getElementById('searchInput').addEventListener('input', debounce((e) => { 
+                STATE.searchQuery = e.target.value.toLowerCase(); scheduleRender(); 
+            }, 300));
+
+            document.getElementById('openLeft').addEventListener('click', () => { document.getElementById('leftSidebar').classList.add('open'); document.getElementById('overlay').classList.add('active'); document.body.style.overflow = 'hidden'; });
+            document.getElementById('openRight').addEventListener('click', () => { document.getElementById('rightSidebar').classList.add('open'); document.getElementById('overlay').classList.add('active'); document.body.style.overflow = 'hidden'; });
+            document.addEventListener('click', (e) => { if (!e.target.closest('.user-menu')) { const drop = document.getElementById('userDropdown'); if(drop) drop.classList.remove('active'); }});
+        }
+
+        function closeSidebars() {['leftSidebar', 'rightSidebar', 'overlay'].forEach(id => { const el = document.getElementById(id); if (el) el.classList.remove('active', 'open'); });
+            document.body.style.overflow = '';
+        }
+
+        function clearChatListeners() {
+            Listeners.chat.forEach(unsub => unsub());
+            Listeners.chat =[];
+        }
+
+        function renderAuth() {
+            const authButtons = document.getElementById('authButtons'); const userMenu = document.getElementById('userMenu');
+            const regBtn = document.getElementById('headerRegBtn'); const regFooter = document.getElementById('loginRegFooter');
+            
+            if (STATE.user) {
+                authButtons.classList.add('hidden'); userMenu.classList.remove('hidden');
+                document.getElementById('userAvatar').textContent = getInitials(STATE.user.name);
+                document.getElementById('userDropdown').innerHTML = `
+                    <div class="user-info"><div class="user-name">${STATE.user.name}</div><div class="user-email">${STATE.user.email}</div></div>
+                    ${(!STATE.isSuspended && !STATE.isRoleUpgraded) ? `<button type="button" class="dropdown-item" onclick="navigate('home')"><i class="fa-solid fa-house"></i> Home</button>` : ''}
+                    <button type="button" class="dropdown-item" onclick="logout()"><i class="fa-solid fa-arrow-right-from-bracket"></i> Logout</button>
+                `;
+            } else {
+                authButtons.classList.remove('hidden'); userMenu.classList.add('hidden');
+                if(STATE.config.registrationEnabled) {
+                    if(regBtn) regBtn.classList.remove('hidden');
+                    if(regFooter) regFooter.innerHTML = `Don't have an account? <a onclick="switchModal('login', 'register')">Register</a>`;
+                } else {
+                    if(regBtn) regBtn.classList.add('hidden');
+                    if(regFooter) regFooter.innerHTML = `<div class="mt-4 text-warning bg-red-50 p-3 rounded-xl border border-red-200 text-[13px] font-medium"><i class="fa-solid fa-lock mr-1"></i> Registration is currently disabled by the administration.</div>`;
+                }
+            }
+        }
+
+        function getInitials(name) { return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2); }
+        
+        function openModal(type) { 
+            if(type === 'register' && !STATE.config.registrationEnabled) {
+                return showToast('Registration is currently disabled by the administration.', 'error');
+            }
+            closeSidebars(); 
+            document.getElementById(type + 'Modal').classList.add('active'); 
+            document.body.style.overflow = 'hidden'; 
+        }
+        function closeModal(type) { document.getElementById(type + 'Modal').classList.remove('active'); document.body.style.overflow = ''; }
+        function switchModal(from, to) { closeModal(from); setTimeout(() => openModal(to), 200); }
+        function toggleUserDropdown() { document.getElementById('userDropdown').classList.toggle('active'); }
+
+        /* Notification & Authentication Logic */
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            
+            let iconClass = 'fa-circle-check';
+            if (type === 'error') iconClass = 'fa-circle-xmark';
+            if (type === 'warning') iconClass = 'fa-triangle-exclamation';
+            if (type === 'loading') iconClass = 'fa-circle-notch fa-spin';
+
+            toast.innerHTML = `<i class="fa-solid ${iconClass}"></i><span>${message}</span>`;
+            container.appendChild(toast);
+            
+            requestAnimationFrame(() => toast.classList.add('show'));
+            setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 400); }, 3500);
+        }
+
+        async function handleRegister(e) {
+            e.preventDefault();
+            if(!STATE.config.registrationEnabled) return showToast('Registration disabled.', 'error');
+            
+            const btn = document.getElementById('registerSubmitBtn');
+            const originalText = btn.innerHTML;
+            
+            const name = document.getElementById('regName').value.trim();
+            const email = document.getElementById('regEmail').value.trim().toLowerCase();
+            const password = document.getElementById('regPassword').value;
+            
+            if (password.length < 6) return showToast('Password must be at least 6 characters long.', 'warning');
+            
+            btn.disabled = true; 
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Creating Account...';
+
+            const userId = encodeEmail(email);
+            const userRef = ref(db, `users/${userId}`);
+
+            try {
+                const snapshot = await get(userRef);
+                if (snapshot.exists()) {
+                    showToast('Account is already registered.', 'error'); 
+                    return; 
+                }
+                
+                await set(userRef, { id: userId, name: name, email: email, password: password, role: 'User', status: 'Active', joinedAt: Date.now() });
+                STATE.user = { id: userId, name: name, email: email }; localStorage.setItem('gpm_rtdb_session', JSON.stringify(STATE.user));
+                listenToUserLikes(); listenToUserSupportStatus(); listenToUserStatus(); listenToUserRole();
+                closeModal('register'); renderAuth(); document.getElementById('registerForm').reset();
+                
+                showToast(`Registration successful! Welcome, ${name}.`, 'success');
+                try{ await push(ref(db, 'audit'), {timestamp: Date.now(), type: 'AUTH', action: 'REGISTER', identity: email, desc: 'New app registration'}); }catch(e){}
+                scheduleRender(); 
+            } catch (error) { 
+                showToast(error.message || 'Registration failed due to a network error.', 'error'); 
+            } finally {
+                if(btn) { btn.disabled = false; btn.innerHTML = originalText; }
+            }
+        }
+
+        async function handleLogin(e) {
+            e.preventDefault();
+            const btn = document.getElementById('loginSubmitBtn');
+            const originalText = btn.innerHTML;
+            
+            const email = document.getElementById('loginEmail').value.trim().toLowerCase();
+            const password = document.getElementById('loginPassword').value;
+            
+            if (!email || !password) return showToast('Please enter both email and password.', 'warning');
+
+            btn.disabled = true; 
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Authenticating...';
+
+            const userId = encodeEmail(email);
+            const userRef = ref(db, `users/${userId}`);
+
+            try {
+                const snapshot = await get(userRef);
+                if (!snapshot.exists()) {
+                    showToast('Account not found.', 'error');
+                    return;
+                }
+                
+                const userData = snapshot.val();
+                if (userData.password !== password) {
+                    showToast('Incorrect password.', 'error'); 
+                    return;
+                }
+                
+                await update(userRef, { lastLogin: Date.now() });
+                
+                STATE.user = { id: userId, name: userData.name, email: userData.email };
+                localStorage.setItem('gpm_rtdb_session', JSON.stringify(STATE.user));
+
+                if (userData.status === 'Suspended') {
+                    STATE.isSuspended = true; listenToUserSupportStatus(); listenToUserStatus(); 
+                    closeModal('login'); renderAuth(); document.getElementById('loginForm').reset(); navigate('suspended'); 
+                    return;
+                }
+                
+                if (userData.role === 'Admin' || userData.role === 'Moderator' || userData.role === 'Superadmin') {
+                    STATE.isRoleUpgraded = true; listenToUserSupportStatus(); listenToUserStatus(); listenToUserRole();
+                    closeModal('login'); renderAuth(); document.getElementById('loginForm').reset(); navigate('role_upgraded'); 
+                    return;
+                }
+
+                STATE.isSuspended = false; STATE.isRoleUpgraded = false;
+                listenToUserLikes(); listenToUserSupportStatus(); listenToUserStatus(); listenToUserRole();
+                closeModal('login'); renderAuth(); document.getElementById('loginForm').reset();
+                
+                showToast(`Login successfully!`, 'success'); 
+                scheduleRender(); 
+            } catch (error) { 
+                showToast(error.message || 'Authentication failed. Please check your connection.', 'error'); 
+            } finally {
+                if(btn) { btn.disabled = false; btn.innerHTML = originalText; }
+            }
+        }
+
+        function logout() {
+            const wasContact = (STATE.currentPage === 'contact');
+            
+            STATE.user = null; STATE.isSuspended = false; STATE.isRoleUpgraded = false; STATE.userLikes =[]; 
+            localStorage.removeItem('gpm_rtdb_session');
+            document.body.classList.remove('suspended-mode', 'role-upgraded-mode'); renderAuth();
+            
+            clearChatListeners();
+            if (Listeners.supportUnread) { Listeners.supportUnread(); Listeners.supportUnread = null; }
+            if (Listeners.status) { Listeners.status(); Listeners.status = null; }
+            if (Listeners.likes) { Listeners.likes(); Listeners.likes = null; }
+            if (Listeners.role) { Listeners.role(); Listeners.role = null; }
+            const navBadge = document.getElementById('nav-support-badge'); if (navBadge) navBadge.classList.add('hidden');
+            
+            showToast('Logout successful.', 'success'); 
+            document.getElementById('userDropdown').classList.remove('active'); 
+            
+            if (wasContact) {
+                scheduleRender(); 
+                setTimeout(() => openModal('login'), 100); 
+            } else {
+                navigate('home');
+            }
+        }
+
+        function navigate(page, id = null) {
+            if (STATE.isRoleUpgraded && page !== 'logout' && page !== 'contact' && page !== 'role_upgraded') {
+                page = 'role_upgraded';
+            } else if (STATE.isSuspended && page !== 'logout' && page !== 'contact' && page !== 'suspended') {
+                page = 'suspended'; 
+            } else if (STATE.config.maintenanceMode && page !== 'contact' && page !== 'logout') {
+                page = 'home'; 
+            }
+
+            STATE.currentPage = page; STATE.currentProphecyId = id;
+            
+            if (page !== 'single') {
+                const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+                window.history.replaceState({path:newUrl}, '', newUrl);
+            }
+            
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.page === page));
+            closeSidebars(); scheduleRender(); window.scrollTo({ top: 0, behavior: 'smooth' });
+            if (page === 'single' && id) runTransaction(ref(db, `content/${id}/views`), (views) => (views || 0) + 1).catch(()=>{});
+            if (page !== 'contact') clearChatListeners();
+        }
+
+        /* ====================================================================
+           10. REAL-TIME SHARE TRACKING ENGINE & DB UPDATER
+        ==================================================================== */
+        async function incrementShare(id) {
+            try {
+                await runTransaction(ref(db, `content/${id}/shares`), (c) => (c || 0) + 1);
+                if(STATE.user) {
+                     try{ await push(ref(db, 'audit'), {timestamp: Date.now(), type: 'USER', action: 'SHARE', identity: STATE.user.email, desc: `Executed content share for matrix ID: ${id}`}); }catch(e){}
+                }
+            } catch(e) { console.warn("Share increment failed", e); }
+        }
+
+        window.openShareProphecy = async function(id) {
+            const prophecy = STATE.propheciesMap.get(id);
+            if (!prophecy) return showToast('Prophecy not found to share.', 'error');
+
+            const loadingToast = document.createElement('div');
+            loadingToast.className = 'toast loading show';
+            loadingToast.innerHTML = '<i class="fa-solid fa-circle-notch"></i><span>Generating HD Social Image...</span>';
+            document.getElementById('toastContainer').appendChild(loadingToast);
+
+            try {
+                const currentDomain = window.location.hostname;
+                const postDeepLinkUrl = `${window.location.origin}${window.location.pathname}?p=${id}`;
+                const professionalShareText = `📖 ${prophecy.title}\n✍️ By Minister Michael\n\nRead the full prophetic message and share your testimony here:\n`;
+                
+                document.getElementById('exportDomainName').textContent = currentDomain;
+                document.getElementById('exportDate').textContent = formatTimeSpan(prophecy.date);
+                document.getElementById('exportTitle').textContent = prophecy.title;
+                
+                const exportBody = document.getElementById('exportBody');
+                exportBody.innerHTML = prophecy.body; 
+                
+                const charCount = exportBody.textContent.length;
+                if (charCount < 250) { exportBody.style.fontSize = '42px'; exportBody.style.lineHeight = '1.8'; } 
+                else if (charCount < 600) { exportBody.style.fontSize = '32px'; exportBody.style.lineHeight = '1.6'; } 
+                else if (charCount < 1200) { exportBody.style.fontSize = '26px'; exportBody.style.lineHeight = '1.6'; } 
+                else { exportBody.style.fontSize = '22px'; exportBody.style.lineHeight = '1.5'; }
+
+                const exportImg = document.getElementById('exportImg');
+                
+                if (prophecy.image) {
+                    exportImg.classList.remove('hidden'); 
+                    exportImg.src = prophecy.image;
+                    
+                    await new Promise((resolve) => {
+                        exportImg.onload = () => {
+                            // 9-SIZE DYNAMIC PREMIUM IMAGE COMPOSITION ENGINE
+                            const ratio = exportImg.naturalWidth / exportImg.naturalHeight;
+                            exportImg.className = 'export-featured-img-premium'; // Reset classes
+                            
+                            if (ratio > 2) exportImg.classList.add('layout-ultra-wide');
+                            else if (ratio > 1.5) exportImg.classList.add('layout-cinematic');
+                            else if (ratio > 1.2) exportImg.classList.add('layout-landscape');
+                            else if (ratio > 1.05) exportImg.classList.add('layout-classic');
+                            else if (ratio >= 0.95) exportImg.classList.add('layout-square');
+                            else if (ratio > 0.8) exportImg.classList.add('layout-portrait-classic');
+                            else if (ratio > 0.6) exportImg.classList.add('layout-portrait');
+                            else if (ratio > 0.4) exportImg.classList.add('layout-social');
+                            else exportImg.classList.add('layout-skyscraper');
+                            
+                            resolve();
+                        };
+                        exportImg.onerror = () => { exportImg.classList.add('hidden'); resolve(); };
+                        setTimeout(resolve, 3000); 
+                    });
+                } else { 
+                    exportImg.classList.add('hidden'); 
+                }
+
+                const wrapper = document.getElementById('exportContainerWrapper');
+                const canvas = await html2canvas(wrapper, { scale: 2, useCORS: true, allowTaint: true, backgroundColor: '#ffffff' });
+                const dataUrl = canvas.toDataURL('image/jpeg', 0.95); 
+                
+                document.getElementById('shareImagePreviewBox').innerHTML = `<img src="${dataUrl}" alt="Preview">`;
+                
+                document.getElementById('btnDownloadImage').onclick = () => {
+                    const link = document.createElement('a'); link.download = `Gospel_Prophecy_${id}.jpg`; link.href = dataUrl; link.click();
+                };
+
+                document.getElementById('btnNativeShare').onclick = async () => {
+                    try {
+                        const blob = await (await fetch(dataUrl)).blob();
+                        const file = new File([blob], 'prophecy.jpg', { type: 'image/jpeg' });
+                        const robustShareText = `${professionalShareText}🔗 ${postDeepLinkUrl}`;
+
+                        if (navigator.canShare && navigator.canShare({ files:[file] })) {
+                            await navigator.share({ files: [file], title: prophecy.title, text: robustShareText });
+                            showToast('Image shared successfully!', 'success');
+                            incrementShare(id);
+                        } else if (navigator.share) {
+                            await navigator.share({ title: prophecy.title, text: robustShareText });
+                            showToast('Image attachment not supported. Link shared natively!', 'warning');
+                            incrementShare(id);
+                        } else {
+                            showToast('Native sharing not supported. Image downloaded.', 'warning');
+                            document.getElementById('btnDownloadImage').click();
+                        }
+                    } catch (err) { 
+                        if (err.name !== 'AbortError') { showToast('Sharing failed. Try copying the link.', 'error'); }
+                    }
+                };
+
+                document.getElementById('btnCopyLink').onclick = () => {
+                    navigator.clipboard.writeText(`${professionalShareText}🔗 ${postDeepLinkUrl}`);
+                    showToast('Professional Link copied to clipboard!', 'success');
+                    incrementShare(id);
+                };
+
+                loadingToast.remove(); openModal('share');
+
+            } catch (err) {
+                loadingToast.remove(); showToast('Failed to generate image. Basic deep-link copied.', 'warning');
+                navigator.clipboard.writeText(`📖 ${prophecy.title}\n🔗 ${window.location.origin}${window.location.pathname}?p=${id}`);
+                incrementShare(id);
+            }
+        };
+        
+        function shareProphecy(id) {
+            const prophecy = STATE.propheciesMap.get(id); if (!prophecy) return;
+            const postDeepLinkUrl = `${window.location.origin}${window.location.pathname}?p=${id}`;
+            const professionalShareText = `📖 ${prophecy.title}\n✍️ By Minister Michael\n\nRead the full prophetic message here:\n🔗 ${postDeepLinkUrl}`;
+
+            if (navigator.share) {
+                navigator.share({ title: prophecy.title, text: professionalShareText }).then(() => {
+                    incrementShare(id);
+                }).catch(e => {
+                    if (e.name !== 'AbortError') {
+                        navigator.clipboard.writeText(professionalShareText).then(() => {
+                            showToast('Link copied to clipboard!', 'success');
+                            incrementShare(id);
+                        });
+                    }
+                });
+            } else {
+                navigator.clipboard.writeText(professionalShareText).then(() => {
+                    showToast('Link copied to clipboard!', 'success');
+                    incrementShare(id);
+                });
+            }
+        }
+
+        function renderHome() {
+            const recent = STATE.prophecies.slice(0, 3);
+            const recentHTML = recent.length > 0 ? `
+                <div class="section-header mt-10">
+                    <h2 class="section-title"><span class="section-icon"><i class="fa-solid fa-fire text-orange-500"></i></span> Latest Prophecies</h2>
+                    <a href="#" class="view-all" onclick="navigate('prophecy'); return false;">View All <i class="fa-solid fa-arrow-right"></i></a>
+                </div>
+                <div class="prophecies-grid mb-12">
+                    ${recent.map(p => `
+                        <div class="prophecy-card-large" onclick="navigate('single', '${p.id}')">
+                            <img src="${p.image}" loading="lazy" alt="${p.title}">
+                            <div class="prophecy-card-large-content">
+                                <div class="p-date flex items-center justify-between"><span>${formatTimeSpan(p.date)}</span>${p.pinned ? '<i class="fa-solid fa-thumbtack text-primary"></i>' : ''}</div>
+                                <h3 class="p-title" style="-webkit-line-clamp: 2; font-size: 17px; margin: 8px 0;">${p.title}</h3>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>` : '';
+
+            const allComments =[]; STATE.prophecies.forEach(p => p.comments.forEach(c => allComments.push({ ...c, pId: p.id, pTitle: p.title })));
+            const latestTestimonies = allComments.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).slice(0, 6);
+            const tHTML = latestTestimonies.map(t => `
+                <div class="testimony-card" onclick="navigate('single', '${t.pId}')">
+                    <i class="fa-solid fa-quote-right testimony-quote"></i><p class="testimony-text">${t.text}</p>
+                    <div class="testimony-footer">
+                        <div class="testimony-avatar" style="background: ${t.avatarColor || '#6d28d9'}">${getInitials(t.user)}</div>
+                        <div><div class="testimony-name">${t.user}</div><div class="testimony-date">${formatTimeSpan(t.date)} • ${t.pTitle.slice(0, 25)}...</div></div>
+                    </div>
+                </div>`).join('') || '<div style="grid-column: 1/-1; text-align: center; padding: 50px; color: var(--gray); background: white; border-radius: 24px; border: 1px solid #f1f5f9;">No testimonies available yet. Be the first to share!</div>';
+
+            safeHTMLPatch('centerContent', `
+                <div class="hero">
+                    <div class="hero-bg"><img src="https://images.unsplash.com/photo-1504052434569-70ad5836ab65?q=80&w=2070" loading="eager" alt="Sunset"></div>
+                    <div class="hero-overlay"></div>
+                    <div class="hero-content">
+                        <h1 class="hero-title">Hear What The<span>Spirit Is Saying</span></h1>
+                        <p class="hero-sub">Timely prophetic words, revelations, and encouragement for the body of Christ in this hour.</p>
+                        <button type="button" class="btn-hero" onclick="openLatestProphecy()"><i class="fa-solid fa-book-open"></i> Read Latest Prophecy</button>
+                    </div>
+                </div>
+                ${recentHTML}
+                <div class="section-header"><h2 class="section-title"><span class="section-icon"><i class="fa-solid fa-heart"></i></span> Powerful Testimonies</h2></div>
+                <div class="testimonies-grid">${tHTML}</div>
+            `);
+        }
+
+        function renderProphecyList() {
+            safeHTMLPatch('centerContent', `
+                <div class="page-header"><h1 class="page-title">All Prophetic Words</h1><p class="page-subtitle">Browse through the archive of prophetic messages from Minister Michael</p></div>
+                <div class="prophecies-grid">
+                    ${STATE.prophecies.length > 0 ? STATE.prophecies.map(p => `
+                        <div class="prophecy-card-large" onclick="navigate('single', '${p.id}')">
+                            <img src="${p.image}" loading="lazy" alt="${p.title}">
+                            <div class="prophecy-card-large-content">
+                                <div class="p-date flex items-center justify-between"><span>${formatTimeSpan(p.date)}</span>${p.pinned ? '<i class="fa-solid fa-thumbtack text-primary"></i>' : ''}</div>
+                                <h3 class="p-title" style="-webkit-line-clamp: 3; font-size: 17px; margin: 8px 0;">${p.title}</h3>
+                                <div class="p-meta" style="margin-top: 14px;"><span><i class="fa-regular fa-clock"></i> ${p.readTime} min read</span><span><i class="fa-solid fa-heart text-red-500"></i> ${p.likes}</span><span><i class="fa-solid fa-share text-[#10b981]"></i> ${p.shares}</span><span><i class="fa-solid fa-comment text-blue-500"></i> ${p.comments.length}</span></div>
+                            </div>
+                        </div>`).join('') : '<div style="grid-column: 1/-1; text-align: center; padding: 50px; color: var(--gray); background: white; border-radius: 24px; border: 1px solid #f1f5f9;">No prophetic words published yet. Check back later!</div>'}
+                </div>
+            `);
+        }
+
+        function renderAbout() {
+            const defaultData = {
+                profileImg: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=200",
+                title: "About Minister Michael", subtitle: "Prophet, Teacher, and Watchman",
+                bodyHTML: "<p>Minister Michael is a prophetic voice raised by God for such a time as this. With over 15 years in ministry, he carries a distinct mandate to hear the heart of the Father and deliver timely words to the body of Christ.</p><p>The Gospel Prophecy Message platform was birthed from Amos 3:7 — <strong>\"Surely the Lord GOD does nothing, unless He reveals His secret to His servants the prophets.\"</strong> Through this ministry, thousands have received direction, encouragement, healing, and restoration.</p><h3><span class=\"w-10 h-10 rounded-xl bg-orange-100 text-orange-500 flex items-center justify-center text-lg inline-flex mr-3\"><i class=\"fa-solid fa-bullseye\"></i></span>Our Mission</h3><p>To equip the saints with prophetic intelligence for victorious living, to sound the alarm in the spirit, and to prepare the bride for the return of the King.</p>",
+                quoteText: "We do not prophecy for fame, but for the edification of the church and the glory of Jesus Christ alone.",
+                quoteAuthor: "Minister Michael"
+            };
+            const data = STATE.about || defaultData;
+
+            safeHTMLPatch('centerContent', `
+                <div class="bg-white rounded-3xl p-8 md:p-12 shadow-[0_4px_20px_rgba(0,0,0,0.04)] border border-border">
+                    <div class="text-center max-w-2xl mx-auto mb-10">
+                        <div class="w-36 h-36 mx-auto rounded-full p-2 bg-primary-light mb-6 border-2 border-primary-light shadow-sm">
+                            <img src="${data.profileImg}" loading="lazy" alt="Profile" class="w-full h-full object-cover rounded-full shadow-md">
+                        </div>
+                        <h1 class="text-3xl md:text-4xl font-extrabold font-display text-dark mb-3">${data.title}</h1>
+                        <p class="text-primary font-bold tracking-wider uppercase text-xs md:text-sm">${data.subtitle}</p>
+                    </div>
+                    <div class="about-body max-w-3xl mx-auto space-y-6">
+                        ${data.bodyHTML}
+                        
+                        <div class="bg-primary-light/50 border border-primary-light p-8 md:px-12 rounded-2xl mt-12 text-center relative overflow-hidden flex flex-col justify-center min-h-[160px]">
+                            <i class="fa-solid fa-quote-left absolute text-[120px] text-primary opacity-5 -top-4 -left-4 pointer-events-none select-none"></i>
+                            <p class="italic text-primary-dark font-medium mb-4 text-lg md:text-xl relative z-10 leading-snug">"${data.quoteText}"</p>
+                            <strong class="text-primary tracking-wide text-sm uppercase relative z-10">— ${data.quoteAuthor}</strong>
+                        </div>
+                    </div>
+                </div>
+            `);
+        }
+
+        function getChatBubbleHTML(m) {
+            return `<div class="chat-bubble ${m.sender === 'user' ? 'user' : 'admin'}">${m.text.replace(/\n/g, '<br>')}<span class="chat-time" style="color: ${m.sender === 'user' ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.5)'}">${getExactTime(m.timestamp)}</span></div>`;
+        }
+
+        function renderContact() {
+            if (!STATE.user) {
+                safeHTMLPatch('centerContent', `
+                    <div class="page-header"><h1 class="page-title">Contact Support</h1><p class="page-subtitle">Direct, private communication with the admin team.</p></div>
+                    <div class="about-content text-center py-16 mt-4 border border-border">
+                        <div class="w-20 h-20 bg-primary-light text-primary rounded-full flex items-center justify-center text-3xl mx-auto mb-6"><i class="fa-solid fa-lock"></i></div>
+                        <h3 class="text-2xl font-bold mb-3">Authentication Required</h3>
+                        <p class="text-gray mb-8 max-w-md mx-auto">Please login or create a free account to initiate a secure, private chat with our support administrators.</p>
+                        <button type="button" class="btn btn-primary mx-auto shadow-lg" onclick="openModal('login')" style="padding: 14px 36px; font-size: 16px;"><i class="fa-solid fa-right-to-bracket mr-2"></i> Login to Chat</button>
+                    </div>`); return;
+            }
+            safeHTMLPatch('centerContent', `
+                ${STATE.isRoleUpgraded ? `<div class="bg-primary-light text-primary-dark border border-primary rounded-xl p-4 mb-5 flex items-center gap-3"><i class="fa-solid fa-user-tie text-lg"></i><span class="font-semibold text-[15px]">Administrative Account Mode. Direct contact to main system super-admins.</span></div>` : ''}
+                ${STATE.isSuspended ? `<div class="bg-red-50 text-red-600 border border-red-200 rounded-xl p-4 mb-5 flex items-center gap-3"><i class="fa-solid fa-triangle-exclamation text-lg"></i><span class="font-semibold text-[15px]">Account Support Mode. Please explain your situation to our admin team.</span></div>` : ''}
+                <div class="chat-container relative shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-border">
+                    <div class="chat-header">
+                        <div class="w-12 h-12 rounded-full bg-primary-light text-primary flex items-center justify-center text-xl shrink-0"><i class="fa-solid fa-user-shield"></i></div>
+                        <div class="flex-1 min-w-0"><div style="color: var(--dark); font-size: 17px; font-weight: 800;">Admin Support Hub</div><div style="color: var(--success); font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 6px; margin-top: 2px;"><i class="fa-solid fa-circle" style="font-size: 8px;"></i> Online - End-to-end Encrypted</div></div>
+                    </div>
+                    <div class="chat-messages" id="chatMessages"></div>
+                    <form class="chat-input-area" onsubmit="sendChatMessage(event)">
+                        <textarea id="chatInput" class="chat-input scrollbar" placeholder="Type your inquiry or message here..." required onkeydown="if(event.keyCode===13 && !event.shiftKey){event.preventDefault(); sendChatMessage(event);}"></textarea>
+                        <button type="submit" class="chat-send-btn" id="chatSendBtn"><i class="fa-solid fa-paper-plane"></i></button>
+                    </form>
+                </div>
+            `);
+            
+            update(ref(db, `support_chats/${STATE.user.id}`), { unreadUser: false }).catch(()=>{});
+            clearChatListeners();
+            
+            const container = document.getElementById('chatMessages');
+            const chatRef = ref(db, `support_chats/${STATE.user.id}/messages`);
+            
+            Listeners.chat.push(onChildAdded(chatRef, snap => {
+                if(!snap.exists()) return; 
+                update(ref(db, `support_chats/${STATE.user.id}`), { unreadUser: false }).catch(()=>{}); 
+                const m = snap.val();
+                const div = document.createElement('div'); 
+                div.id = `msg-${snap.key}`;
+                div.className = `flex flex-col mb-3 ${m.sender === 'user' ? 'items-end' : 'items-start'}`;
+                div.innerHTML = getChatBubbleHTML(m);
+                if (container) {
+                    container.appendChild(div); 
+                    requestAnimationFrame(() => { container.scrollTop = container.scrollHeight; }); 
+                }
+            }));
+
+            Listeners.chat.push(onChildChanged(chatRef, snap => {
+                if(!snap.exists()) return; 
+                const m = snap.val();
+                const div = document.getElementById(`msg-${snap.key}`);
+                if (div) {
+                    div.className = `flex flex-col mb-3 ${m.sender === 'user' ? 'items-end' : 'items-start'}`;
+                    div.innerHTML = getChatBubbleHTML(m);
+                }
+            }));
+
+            Listeners.chat.push(onChildRemoved(chatRef, snap => {
+                const div = document.getElementById(`msg-${snap.key}`);
+                if (div) div.remove();
+            }));
+        }
+
+        async function sendChatMessage(e) {
+            if (e) e.preventDefault(); 
+            const currentUser = STATE.user; 
+            if (!currentUser) return;
+            
+            const input = document.getElementById('chatInput'); const btn = document.getElementById('chatSendBtn'); 
+            const text = input.value.trim(); 
+            
+            if (!text) {
+                return showToast('Message cannot be empty.', 'warning');
+            }
+            
+            input.disabled = true; btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i>';
+            
+            try {
+                const timestamp = Date.now();
+                await push(ref(db, `support_chats/${currentUser.id}/messages`), { text: text, sender: 'user', timestamp: timestamp });
+                await set(ref(db, `tickets/${currentUser.id}`), { title: `Chat: ${text.substring(0, 30)}...`, user: currentUser.name, email: currentUser.email, status: 'Open', date: timestamp, lastMessage: text });
+                await update(ref(db, `support_chats/${currentUser.id}`), { unreadAdmin: true, lastActivity: timestamp });
+                if(input) input.value = '';
+                try{ await push(ref(db, 'audit'), {timestamp: Date.now(), type: 'SUPPORT', action: 'CREATE', identity: currentUser.email, desc: 'Sent direct support message'}); }catch(e){}
+            } catch (error) { 
+                showToast('Failed to send message. Please check connection.', 'error'); 
+            } 
+            finally { 
+                if(input) input.disabled = false; 
+                if(btn) { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i>'; }
+                if(input) input.focus(); 
+            }
+        }
+
+        function renderSingleProphecy(id) {
+            const prophecy = STATE.propheciesMap.get(id); if (!prophecy) return;
+            const isLiked = STATE.userLikes.includes(id);
+            let commentFormUI = !STATE.config.commentsEnabled ? `<div class="p-6 text-center bg-gray-50 rounded-2xl text-gray font-medium border border-border mt-4"><i class="fa-solid fa-lock mr-2 text-gray-light"></i>This feature has been disabled by the administration.</div>` : STATE.user ? `
+                <form class="comment-form" onsubmit="addComment(event, '${id}')">
+                    <textarea placeholder="Share your testimony or what God is saying to you through this word..." required id="commentText"></textarea>
+                    <div class="comment-form-footer"><button type="submit" class="btn btn-primary" id="commentSubmitBtn"><i class="fa-solid fa-paper-plane"></i> Post Testimony</button></div>
+                </form>` : `<div class="login-prompt"><i class="fa-solid fa-lock mr-2"></i> Please <a onclick="openModal('login')">login</a> to share your testimony</div>`;
+
+            safeHTMLPatch('centerContent', `
+                <div class="single-view">
+                    <button type="button" class="back-btn" onclick="navigate('home')"><i class="fa-solid fa-arrow-left"></i> Back to Home</button>
+                    <img src="${prophecy.image}" alt="${prophecy.title}" class="single-img">
+                    <div class="single-meta flex justify-between w-full items-center">
+                        <div class="flex items-center gap-4 flex-wrap"><span class="single-date">${formatTimeSpan(prophecy.date)}</span><span class="single-read"><i class="fa-regular fa-clock"></i> ${prophecy.readTime} min read</span></div>
+                        ${prophecy.pinned ? '<div class="text-primary font-bold text-sm bg-primary-light px-3 py-1 rounded-lg"><i class="fa-solid fa-thumbtack mr-1"></i> Pinned</div>' : ''}
+                    </div>
+                    <h1 class="single-title">${prophecy.title}</h1><div class="single-body">${prophecy.body}</div>
+                    <div class="single-actions">
+                        <button type="button" class="action-btn ${isLiked ? 'liked' : ''}" onclick="toggleLike('${id}')" id="likeBtn"><i class="fa-${isLiked ? 'solid' : 'regular'} fa-heart"></i><span>${prophecy.likes} ${prophecy.likes === 1 ? 'Like' : 'Likes'}</span></button>
+                        <button type="button" class="action-btn" onclick="openShareProphecy('${id}')"><i class="fa-solid fa-share-nodes"></i><span>Share HD Image (${prophecy.shares})</span></button>
+                    </div>
+                    <div class="comments-section">
+                        <h3><i class="fa-solid fa-comments" style="color: var(--primary);"></i> Testimonies & Comments (${prophecy.comments.length})</h3>${commentFormUI}
+                        <div class="comment-list" id="commentList">
+                            ${prophecy.comments.slice().reverse().map(c => `
+                                <div class="comment-item">
+                                    <div class="comment-avatar" style="background: ${c.avatarColor || '#6d28d9'}">${getInitials(c.user)}</div>
+                                    <div class="comment-content"><div class="comment-header"><span class="comment-name">${c.user}</span><span class="comment-date">• ${formatTimeSpan(c.date)}</span></div><p class="comment-text">${c.text}</p></div>
+                                </div>`).join('') || (!STATE.config.commentsEnabled ? '' : '<p style="text-align:center; color: var(--gray); padding: 30px; font-size: 15px; font-weight: 500;">Be the first to share a testimony!</p>')}
+                        </div>
+                    </div>
+                </div>
+            `);
+        }
+
+        function renderRightSidebar() {
+            if(STATE.config.maintenanceMode && STATE.currentPage !== 'contact') {
+                document.querySelector('.search-wrap').style.display = 'none';
+                safeHTMLPatch('prophecyList', `<div class="p-6 text-center text-gray text-[15px] font-semibold bg-gray-50 rounded-2xl border border-border">Content unavailable during maintenance.</div>`); return;
+            }
+            document.querySelector('.search-wrap').style.display = 'block';
+            let filtered = STATE.searchQuery ? STATE.prophecies.filter(p => p.title.toLowerCase().includes(STATE.searchQuery) || formatTimeSpan(p.date).toLowerCase().includes(STATE.searchQuery)) : STATE.prophecies;
+            safeHTMLPatch('prophecyList', filtered.map(p => `
+                <div class="prophecy-card" onclick="navigate('single', '${p.id}'); closeSidebars();">
+                    <div class="p-card-top"><img src="${p.image}" loading="lazy" alt="" class="p-thumb"><div class="p-content"><div class="p-date flex justify-between"><span>${formatTimeSpan(p.date)}</span>${p.pinned ? '<i class="fa-solid fa-thumbtack text-primary"></i>' : ''}</div><div class="p-title">${p.title}</div><div class="p-meta"><span><i class="fa-regular fa-clock"></i> ${p.readTime}m</span><span><i class="fa-solid fa-heart text-red-500"></i> ${p.likes}</span><span><i class="fa-solid fa-share text-[#10b981]"></i> ${p.shares}</span></div></div></div>
+                    <button type="button" class="btn-read">Read full Message</button>
+                </div>`).join('') || `<p style="text-align:center; color: var(--gray); padding: 30px; font-size: 15px; font-weight: 500;">No prophecies found matching your search.</p>`);
+        }
+
+        async function toggleLike(id) {
+            const currentUser = STATE.user; 
+            if (!currentUser) { showToast('Please login to like prophecies', 'error'); openModal('login'); return; }
+            
+            const btn = document.getElementById('likeBtn');
+            if (btn) btn.disabled = true; 
+            
+            try {
+                if (STATE.userLikes.includes(id)) { 
+                    await set(ref(db, `users/${currentUser.id}/likes/${id}`), null); 
+                    await runTransaction(ref(db, `content/${id}/likes`), (c) => Math.max(0, (c || 0) - 1)); 
+                    showToast('Prophecy removed from your likes.', 'success'); 
+                } else { 
+                    await set(ref(db, `users/${currentUser.id}/likes/${id}`), true); 
+                    await runTransaction(ref(db, `content/${id}/likes`), (c) => (c || 0) + 1); 
+                    showToast('Prophecy added to your likes!', 'success'); 
+                    try{ await push(ref(db, 'audit'), {timestamp: Date.now(), type: 'USER', action: 'LIKE', identity: currentUser.email, desc: `Liked post ${id}`}); }catch(e){} 
+                }
+            } catch (error) { 
+                showToast('Failed to update likes.', 'error'); 
+            } finally {
+                if (btn) btn.disabled = false;
+            }
+        }
+
+        async function addComment(e, prophecyId) {
+            e.preventDefault(); 
+            const currentUser = STATE.user; 
+            const input = document.getElementById('commentText');
+            const btn = document.getElementById('commentSubmitBtn');
+            
+            if (!currentUser || !STATE.config.commentsEnabled) return;
+            
+            if (!input.value.trim()) {
+                return showToast('Please enter a valid message before submitting.', 'warning');
+            }
+            
+            const originalText = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Publishing...';
+            
+            try {
+                await push(ref(db, `content/${prophecyId}/comments`), { user: currentUser.name, userId: currentUser.id, text: input.value.trim(), date: new Date().toISOString(), avatarColor: AVATAR_COLORS[Math.floor(Math.random() * AVATAR_COLORS.length)] });
+                input.value = ''; 
+                showToast('Comments posted successfully!', 'success'); 
+                try{ await push(ref(db, 'audit'), {timestamp: Date.now(), type: 'CONTENT', action: 'COMMENT', identity: currentUser.email, desc: `Commented on post ${prophecyId}`}); }catch(e){}
+            } catch (error) { 
+                showToast('Failed to post testimony. Please try again.', 'error'); 
+            } finally {
+                if(btn) { btn.disabled = false; btn.innerHTML = originalText; }
+            }
+        }
+
+        function openLatestProphecy() { const latest = STATE.prophecies[0]; if (latest) navigate('single', latest.id); else showToast('No prophecies available yet', 'warning'); }
+        
+        /* Accurate Timespan & Timestamp Formatting Engine */
+        function getExactTime(dateStr) {
+            if (!dateStr) return '';
+            const d = new Date(dateStr);
+            let hours = d.getHours();
+            let minutes = d.getMinutes();
+            const ampm = hours >= 12 ? 'pm' : 'am';
+            hours = hours % 12;
+            hours = hours ? hours : 12; // the hour '0' should be '12'
+            minutes = minutes < 10 ? '0' + minutes : minutes;
+            return hours + ':' + minutes + ampm;
+        }
+
+        function formatTimeSpan(dateStr) {
+            if (!dateStr) return '';
+            const d = new Date(dateStr);
+            const now = new Date();
+            const diffMs = now - d;
+            const diffSec = Math.max(0, Math.floor(diffMs / 1000));
+            const diffMin = Math.floor(diffSec / 60);
+            const diffHour = Math.floor(diffMin / 60);
+            const diffDay = Math.floor(diffHour / 24);
+
+            const exactTime = getExactTime(dateStr);
+
+            if (diffSec < 60) {
+                return `Just now • ${exactTime}`;
+            } else if (diffMin < 60) {
+                return `${diffMin}m ago • ${exactTime}`;
+            } else if (diffHour < 24 && now.getDate() === d.getDate()) {
+                return `Today • ${exactTime}`;
+            } else if (diffHour < 48 && now.getDate() !== d.getDate() && diffDay < 2) {
+                return `Yesterday • ${exactTime}`;
+            } else if (diffDay < 7) {
+                return `${diffDay}d ago • ${exactTime}`;
+            } else {
+                const datePart = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                return `${datePart} • ${exactTime}`;
+            }
+        }
+
+        // Window Exports for DOM Event Bindings
+        window.openModal = openModal; window.closeModal = closeModal; window.switchModal = switchModal;
+        window.toggleUserDropdown = toggleUserDropdown; window.handleRegister = handleRegister; window.handleLogin = handleLogin;
+        window.logout = logout; window.navigate = navigate; window.closeSidebars = closeSidebars; window.toggleLike = toggleLike;
+        window.addComment = addComment; window.openLatestProphecy = openLatestProphecy; window.sendChatMessage = sendChatMessage; window.shareProphecy = shareProphecy;
+
+        init();
+    </script>
+</body>
+</html>
